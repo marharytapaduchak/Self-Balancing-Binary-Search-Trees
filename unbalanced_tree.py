@@ -6,6 +6,10 @@ from data_entry import DataEntry
 from abstract_tree import AbstractTree
 
 class UnbalancedTreeNode:
+    """
+    Represents unbalanced binary tree node
+    """
+
     def __init__(self, data_entry: DataEntry):
         self.data = [data_entry]
         self.left = None
@@ -20,6 +24,19 @@ class UnbalancedTree(AbstractTree):
         super().__init__(key_col)
         self.__root = None
 
+    def __erase_node(self, node: UnbalancedTreeNode):
+        if node.left is None:
+            return node.right
+
+        if node.right is None:
+            return node.left
+
+        tmp_node = node.right
+        node.right = tmp_node.left
+        tmp_node.left = self.__erase_node(node)
+
+        return tmp_node
+
     def insert(self, data_entry: DataEntry) -> None:
         if self.__root is None:
             self.__root = UnbalancedTreeNode(data_entry)
@@ -32,13 +49,11 @@ class UnbalancedTree(AbstractTree):
                 if curr_node.left is None:
                     curr_node.left = UnbalancedTreeNode(data_entry)
                     return
-
                 curr_node = curr_node.left
             elif data_entry.columns[self._key_col] > curr_node.data[0].columns[self._key_col]:
                 if curr_node.right is None:
                     curr_node.right = UnbalancedTreeNode(data_entry)
                     return
-
                 curr_node = curr_node.right
             else:
                 curr_node.data.append(data_entry)
@@ -57,19 +72,6 @@ class UnbalancedTree(AbstractTree):
                 curr_node = curr_node.right
             else:
                 return curr_node.data
-
-    def __erase_node(self, node):
-        if node.left is None:
-            return node.right
-
-        if node.right is None:
-            return node.left
-
-        tmp_node = node.right
-        node.right = tmp_node.left
-        tmp_node.left = self.__erase_node(node)
-
-        return tmp_node
 
     def erase(self, key):
         curr_node = self.__root
@@ -96,7 +98,7 @@ class UnbalancedTree(AbstractTree):
 
             curr_node = curr_node.right
 
-    def inorder(self):
+    def inorder(self) -> list[DataEntry]:
         def inorder_recursive(node, result):
             if node is None:
                 return
@@ -114,7 +116,7 @@ class UnbalancedTree(AbstractTree):
 
         return result
 
-    def preorder(self):
+    def preorder(self) -> list[DataEntry]:
         def preorder_recursive(node, result):
             if node is None:
                 return
@@ -131,7 +133,7 @@ class UnbalancedTree(AbstractTree):
 
         return result
 
-    def postorder(self):
+    def postorder(self) -> list[DataEntry]:
         def postorder_recursive(node, result):
             if node is None:
                 return

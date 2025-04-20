@@ -7,8 +7,9 @@ import random
 
 from data_entry import DataEntry
 from unbalanced_tree import UnbalancedTree
+from splay_tree import SplayTree
 
-TREES_FOR_TEST = [UnbalancedTree]
+TREES_FOR_TEST = [UnbalancedTree, SplayTree]
 
 class TestTree(unittest.TestCase):
     """
@@ -23,19 +24,19 @@ class TestTree(unittest.TestCase):
         tests_count = 10
         test_size = 100
 
-        for _ in range(tests_count):
-            values = []
-            for _ in range(test_size):
-                data_entry = DataEntry(list(range(test_size)))
-                random.shuffle(data_entry.columns)
-                values.append(data_entry)
+        for TreeType in TREES_FOR_TEST:
+            for _ in range(tests_count):
+                values = []
+                for _ in range(test_size):
+                    data_entry = DataEntry(list(range(test_size)))
+                    random.shuffle(data_entry.columns)
+                    values.append(data_entry)
 
-            key_col = random.randint(0, test_size - 1)
+                key_col = random.randint(0, test_size - 1)
 
-            sorted_values = values.copy()
-            sorted_values.sort(key=lambda data : data.columns[key_col])
+                sorted_values = values.copy()
+                sorted_values.sort(key=lambda data : data.columns[key_col])
 
-            for TreeType in TREES_FOR_TEST:
                 tree = TreeType(key_col)
 
                 curr_values = []
@@ -64,23 +65,23 @@ class TestTree(unittest.TestCase):
         tests_count = 10
         test_size = 100
 
-        for _ in range(tests_count):
-            values = []
-            for _ in range(test_size):
-                data_entry = DataEntry(list(range(test_size)))
-                random.shuffle(data_entry.columns)
-                values.append(data_entry)
+        for TreeType in TREES_FOR_TEST:
+            for _ in range(tests_count):
+                values = []
+                for _ in range(test_size):
+                    data_entry = DataEntry(list(range(test_size)))
+                    random.shuffle(data_entry.columns)
+                    values.append(data_entry)
 
-            key_col = random.randint(0, test_size - 1)
+                key_col = random.randint(0, test_size - 1)
 
-            vals_for_key_cols = {}
-            for value in values:
-                if value.columns[key_col] in vals_for_key_cols:
-                    vals_for_key_cols[value.columns[key_col]].append(value)
-                else:
-                    vals_for_key_cols[value.columns[key_col]] = [value]
+                vals_for_key_cols = {}
+                for value in values:
+                    if value.columns[key_col] in vals_for_key_cols:
+                        vals_for_key_cols[value.columns[key_col]].append(value)
+                    else:
+                        vals_for_key_cols[value.columns[key_col]] = [value]
 
-            for TreeType in TREES_FOR_TEST:
                 tree = TreeType(key_col)
                 for value in values:
                     tree.insert(value)
@@ -96,20 +97,20 @@ class TestTree(unittest.TestCase):
         tests_count = 10
         test_size = 100
 
-        for _ in range(tests_count):
-            values = []
+        for TreeType in TREES_FOR_TEST:
+            for _ in range(tests_count):
+                values = []
 
-            for _ in range(test_size):
-                data_entry = DataEntry(list(range(test_size)))
-                random.shuffle(data_entry.columns)
-                values.append(data_entry)
+                for _ in range(test_size):
+                    data_entry = DataEntry(list(range(test_size)))
+                    random.shuffle(data_entry.columns)
+                    values.append(data_entry)
 
-            key_col = random.randint(0, test_size - 1)
+                key_col = random.randint(0, test_size - 1)
 
-            sorted_values = values.copy()
-            sorted_values.sort(key=lambda data : data.columns[key_col])
+                sorted_values = values.copy()
+                sorted_values.sort(key=lambda data : data.columns[key_col])
 
-            for TreeType in TREES_FOR_TEST:
                 tree = TreeType(key_col)
                 for value in values:
                     tree.insert(value)
@@ -138,16 +139,16 @@ class TestTree(unittest.TestCase):
         tests_count = 10
         test_size = 100
 
-        for _ in range(tests_count):
-            values = []
-            for _ in range(test_size):
-                data_entry = DataEntry(list(range(test_size)))
-                random.shuffle(data_entry.columns)
-                values.append(data_entry)
+        for TreeType in TREES_FOR_TEST:
+            for _ in range(tests_count):
+                values = []
+                for _ in range(test_size):
+                    data_entry = DataEntry(list(range(test_size)))
+                    random.shuffle(data_entry.columns)
+                    values.append(data_entry)
 
-            key_col = random.randint(0, test_size - 1)
-
-            for TreeType in TREES_FOR_TEST:
+                key_col = random.randint(0, test_size - 1)
+            
                 tree = TreeType(key_col)
 
                 curr_values = []
@@ -175,4 +176,4 @@ class TestTree(unittest.TestCase):
                     self.assertListEqual(tree.inorder(), sorted_postorder)
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
