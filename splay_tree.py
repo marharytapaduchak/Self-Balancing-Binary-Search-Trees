@@ -85,14 +85,6 @@ class SplayTree(AbstractTree):
 
         self.__splay(node)
 
-    def __find_greatest_node(self) -> SplayTreeNode:
-        curr_node = self.__root
-
-        while curr_node.right is not None:
-            curr_node = curr_node.right
-
-        return curr_node
-
     def insert(self, data_entry: DataEntry) -> None:
         if self.__root is None:
             self.__root = SplayTreeNode(data_entry)
@@ -151,7 +143,12 @@ class SplayTree(AbstractTree):
             right_subtree = self.__root.right
 
             self.__root = left_subtree
-            self.__splay(self.__find_greatest_node())
+
+            greatest_node = self.__root
+            while greatest_node.right is not None:
+                greatest_node = greatest_node.right
+
+            self.__splay(greatest_node)
             self.__root.right = right_subtree
             if right_subtree is not None:
                 right_subtree.parent = self.__root
