@@ -86,9 +86,6 @@ class SplayTree(AbstractTree):
         self.__splay(node)
 
     def __find_greatest_node(self) -> SplayTreeNode:
-        if self.__root is None:
-            return None
-
         curr_node = self.__root
 
         while curr_node.right is not None:
