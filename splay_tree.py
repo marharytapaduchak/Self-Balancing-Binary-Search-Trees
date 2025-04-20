@@ -68,19 +68,28 @@ class SplayTree(AbstractTree):
 
         if node.parent is self.__root:
             if node is self.__root.left:
+                # zig
                 self.__rotate_right(self.__root)
             else:
+                # zag
                 self.__rotate_left(self.__root)
             return
 
         if node.parent is node.parent.parent.left:
-            self.__rotate_right(node.parent.parent)
-        else:
-            self.__rotate_left(node.parent.parent)
-
-        if node is node.parent.left:
+            if node is node.parent.left:
+                # zig-zig
+                self.__rotate_right(node.parent.parent)
+            else:
+                # zag-zig
+                self.__rotate_left(node.parent)
             self.__rotate_right(node.parent)
         else:
+            if node is node.parent.right:
+                # zag-zag
+                self.__rotate_left(node.parent.parent)
+            else:
+                # zig-zag
+                self.__rotate_right(node.parent)
             self.__rotate_left(node.parent)
 
         self.__splay(node)
@@ -137,25 +146,24 @@ class SplayTree(AbstractTree):
         if not data_to_erase:
             return
 
-        left_subtree = self.__root.left
-        if left_subtree is not None:
-            left_subtree.parent = None
+        if self.__root.left is not None:
             right_subtree = self.__root.right
-
-            self.__root = left_subtree
+            self.__root = self.__root.left
+            self.__root.parent = None
 
             greatest_node = self.__root
             while greatest_node.right is not None:
                 greatest_node = greatest_node.right
 
             self.__splay(greatest_node)
-            self.__root.right = right_subtree
             if right_subtree is not None:
+                self.__root.right = right_subtree
                 right_subtree.parent = self.__root
-        else:
+        elif self.__root.right is not None:
             self.__root = self.__root.right
-            if self.__root is not None:
-                self.__root.parent = None
+            self.__root.parent = None
+        else:
+            self.__root = None
 
     def inorder(self) -> list[DataEntry]:
         def inorder_recursive(node, result):
