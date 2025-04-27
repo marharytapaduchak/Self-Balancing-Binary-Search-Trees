@@ -12,10 +12,41 @@ class SplayTreeNode(AbstractTreeNode):
 
     def __init__(self, data_entry: DataEntry):
         super().__init__(data_entry)
-        self.left = None
-        self.right = None
+        self.__left = None
+        self.__right = None
         self.parent = None
 
+    @property
+    def left(self):
+        """
+        Obtains left child node
+        """
+        return self.__left
+
+    @left.setter
+    def left(self, new_left):
+        """
+        Sets left child node
+        """
+        self.__left = new_left
+        if new_left is not None:
+            self.__left.parent = self
+
+    @property
+    def right(self):
+        """
+        Obtains right child node
+        """
+        return self.__right
+
+    @right.setter
+    def right(self, new_right):
+        """
+        Sets right child node
+        """
+        self.__right = new_right
+        if new_right is not None:
+            self.__right.parent = self
 
 class SplayTree(AbstractTree):
     """
@@ -28,15 +59,11 @@ class SplayTree(AbstractTree):
 
     def __rotate_left(self, node: SplayTreeNode) -> None:
         new_root = node.right
+        new_root.parent = node.parent
         node.right = new_root.left
         new_root.left = node
 
-        new_root.parent = node.parent
-        node.parent = new_root
-        if node.right is not None:
-            node.right.parent = node
-
-        if node is self.__root:
+        if new_root.parent is None:
             self.__root = new_root
         else:
             if node is new_root.parent.left:
@@ -46,15 +73,11 @@ class SplayTree(AbstractTree):
 
     def __rotate_right(self, node: SplayTreeNode) -> None:
         new_root = node.left
+        new_root.parent = node.parent
         node.left = new_root.right
         new_root.right = node
 
-        new_root.parent = node.parent
-        node.parent = new_root
-        if node.left is not None:
-            node.left.parent = node
-
-        if node is self.__root:
+        if new_root.parent is None:
             self.__root = new_root
         else:
             if node is new_root.parent.left:

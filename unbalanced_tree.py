@@ -3,17 +3,18 @@ Contains unbalanced binary tree representation
 """
 
 from data_entry import DataEntry
-from abstract_tree import AbstractTree
+from abstract_tree import AbstractTree, AbstractTreeNode
 
-class UnbalancedTreeNode:
+class UnbalancedTreeNode(AbstractTreeNode):
     """
     Represents unbalanced binary tree node
     """
 
     def __init__(self, data_entry: DataEntry):
-        self.data = [data_entry]
+        super().__init__(data_entry)
         self.left = None
         self.right = None
+
 
 class UnbalancedTree(AbstractTree):
     """
