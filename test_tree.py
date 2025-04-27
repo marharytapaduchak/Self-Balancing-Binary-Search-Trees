@@ -9,8 +9,9 @@ from data_entry import DataEntry
 from unbalanced_tree import UnbalancedTree
 from splay_tree import SplayTree
 from avl_tree import AVLTree
+from red_black_tree import RedBlackTree
 
-TREES_FOR_TEST = [UnbalancedTree, SplayTree, AVLTree]
+TREES_FOR_TEST = [UnbalancedTree, SplayTree, AVLTree, RedBlackTree]
 
 class TestTree(unittest.TestCase):
     """
@@ -149,7 +150,7 @@ class TestTree(unittest.TestCase):
                     values.append(data_entry)
 
                 key_col = random.randint(0, test_size - 1)
-            
+
                 tree = TreeType(key_col)
 
                 curr_values = []
