@@ -8,8 +8,9 @@ import random
 from data_entry import DataEntry
 from unbalanced_tree import UnbalancedTree
 from splay_tree import SplayTree
+from avl_tree import AVLTree
 
-TREES_FOR_TEST = [UnbalancedTree, SplayTree]
+TREES_FOR_TEST = [UnbalancedTree, SplayTree, AVLTree]
 
 class TestTree(unittest.TestCase):
     """

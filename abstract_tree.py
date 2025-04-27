@@ -1,10 +1,19 @@
 """
-Contains base class of tree
+Contains base class of tree and node
 """
 
 from abc import ABC, abstractmethod
 
 from data_entry import DataEntry
+
+class AbstractTreeNode(ABC):
+    """
+    Represents tree base node
+    """
+
+    def __init__(self, data_entry: DataEntry):
+        self.data = [data_entry]
+
 
 class AbstractTree(ABC):
     """

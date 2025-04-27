@@ -3,15 +3,15 @@ Implementing AVL-tree.
 """
 
 from data_entry import DataEntry
-from abstract_tree import AbstractTree
+from abstract_tree import AbstractTree, AbstractTreeNode
 
-class AVLTreeNode:
+class AVLTreeNode(AbstractTreeNode):
     """
     Represents AVL tree node.
     """
 
     def __init__(self, data_entry: DataEntry):
-        self.data = [data_entry]
+        super().__init__(data_entry)
         self.left = None
         self.right = None
         self.height = 1
