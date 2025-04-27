@@ -4,10 +4,10 @@ Implementation of Red-Black tree
 from enum import Enum
 
 from data_entry import DataEntry
-from abstract_tree import AbstractTree
+from abstract_tree import AbstractTree, AbstractTreeNode
 
 
-class RedBlackNode:
+class RedBlackNode(AbstractTreeNode):
     """
     Node in Red-Black tree
     """
@@ -20,10 +20,10 @@ class RedBlackNode:
         color should match enum
         COLORS = Enum("Colors", [("BLACK", 0), ("RED", 1)])
         """
+        super().__init__(data)
         self._left = left
         self._right = right
         self.parent = parent
-        self.data = [data]
         if color not in self.COLORS:
             raise ValueError('color should match Enum("Colors", [("BLACK", 0), ("RED", 1)])')
         self.color = color
