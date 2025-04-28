@@ -29,6 +29,8 @@ class RedBlackNode(AbstractTreeNode):
         self.color = color
 
     def __eq__(self, other: "RedBlackNode") -> bool:
+        if not isinstance(other, RedBlackNode):
+            return False
         return self.data == other.data
 
     @property
@@ -38,7 +40,8 @@ class RedBlackNode(AbstractTreeNode):
     @left.setter
     def left(self, node: "RedBlackNode"):
         self._left = node
-        node.parent = self
+        if node is not None:
+            node.parent = self
 
     @property
     def right(self):
@@ -47,7 +50,8 @@ class RedBlackNode(AbstractTreeNode):
     @right.setter
     def right(self, node: "RedBlackNode"):
         self._right = node
-        node.parent = self
+        if node is not None:
+            node.parent = self
 
 
 class RedBlackTree(AbstractTree):
@@ -60,6 +64,8 @@ class RedBlackTree(AbstractTree):
 
 
     def __rotate_left(self, node: RedBlackNode):
+        if node is None:
+            return
         right = node.right
         par = node.parent
         node.right = right.left
@@ -67,6 +73,7 @@ class RedBlackTree(AbstractTree):
 
         if par is None:
             right.color = RedBlackNode.COLORS["BLACK"].value
+            right.parent = None
             self.__root = right
         else:
             if par.left == node:
@@ -75,6 +82,8 @@ class RedBlackTree(AbstractTree):
                 par.right = right
 
     def __rotate_right(self, node: RedBlackNode):
+        if node is None:
+            return
         left = node.left
         par = node.parent
         node.left = left.right
@@ -82,6 +91,7 @@ class RedBlackTree(AbstractTree):
 
         if par is None:
             left.color = RedBlackNode.COLORS["BLACK"].value
+            left.parent = None
             self.__root = left
         else:
             if par.right == node:
@@ -111,14 +121,27 @@ class RedBlackTree(AbstractTree):
         """
         returns DataEntry if key from data_entry is already in the tree
         """
+        if self.__root is None:
+            self.__root = RedBlackNode(data_entry, RedBlackNode.COLORS["BLACK"])
+            return None
 
         def rebalance(node: RedBlackNode):
             parent = node.parent
-            if parent is None:
-                node.color = RedBlackNode.COLORS["BLACK"].value
-            while parent.color != RedBlackNode.COLORS["BLACK"]:
+
+            while parent is not None and parent.color != RedBlackNode.COLORS["BLACK"]:
                 grandpar = parent.parent
-                if grandpar.left.color == grandpar.right.color:
+                if grandpar is None:
+                    if parent.left is None or parent.right is None:
+                        return
+                    if node == parent.left:
+                        node.color = parent.right.color
+                    else:
+                        node.color = parent.left.color
+                    return
+
+                if grandpar.left is not None and grandpar.right is not None and \
+                        grandpar.left.color == grandpar.right.color:
+
                     grandpar.left.color = grandpar.right.color = RedBlackNode.COLORS["BLACK"]
                     grandpar.color = RedBlackNode.COLORS["RED"]
                     node = grandpar
@@ -136,9 +159,9 @@ class RedBlackTree(AbstractTree):
                     self.__rotate_left(grandpar)
 
                 parent = node.parent
-                if parent is None:
-                    node.color = RedBlackNode.COLORS["BLACK"].value
 
+            if parent is None:
+                node.color = RedBlackNode.COLORS["BLACK"].value
 
 
 
@@ -146,21 +169,24 @@ class RedBlackTree(AbstractTree):
         key = data_entry.columns[self._key_col]
         while cur is not None:
             if key < cur.data[0].columns[self._key_col]:
-                cur = cur.left
                 if cur.left is None:
                     cur.left = RedBlackNode(data_entry, parent=cur)
                     rebalance(cur.left)
+                    break
+                cur = cur.left
 
 
             elif key > cur.data[0].columns[self._key_col]:
-                cur = cur.right
                 if cur.right is None:
                     cur.right = RedBlackNode(data_entry, parent=cur)
                     rebalance(cur.right)
+                    break
+                cur = cur.right
 
 
             else:
                 cur.data.append(data_entry)
+                break
 
 
 
@@ -169,13 +195,35 @@ class RedBlackTree(AbstractTree):
     def erase(self, key):
         return super().erase(key)
 
-    def inorder(self):
-        return super().inorder()
+    def inorder(self) -> list[DataEntry]:
+        def inorder_recursive(node, result):
+            if node is None:
+                return
 
-    def preorder(self):
-        return super().preorder()
+            inorder_recursive(node.left, result)
 
-    def postorder(self):
+            for data_entry in node.data:
+                result.append(data_entry)
+
+            inorder_recursive(node.right, result)
+
+        result = []
+
+        inorder_recursive(self.__root, result)
+
+        return result
+
+
+
+    def preorder(self) -> list[DataEntry]:
+        def inner(node: RedBlackNode) -> list[RedBlackNode]:
+            if node is None:
+                return []
+            return [node.data] + inner(node.left) + inner(node.right)
+
+        return inner(self.__root)
+
+    def postorder(self) -> list[DataEntry]:
         return super().postorder()
 
 
