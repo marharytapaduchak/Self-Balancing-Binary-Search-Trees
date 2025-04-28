@@ -196,22 +196,12 @@ class RedBlackTree(AbstractTree):
         return super().erase(key)
 
     def inorder(self) -> list[DataEntry]:
-        def inorder_recursive(node, result):
+        def inner(node: RedBlackNode) -> list[RedBlackNode]:
             if node is None:
-                return
+                return []
+            return inner(node.left) + [*node.data] + inner(node.right)
 
-            inorder_recursive(node.left, result)
-
-            for data_entry in node.data:
-                result.append(data_entry)
-
-            inorder_recursive(node.right, result)
-
-        result = []
-
-        inorder_recursive(self.__root, result)
-
-        return result
+        return inner(self.__root)
 
 
 
@@ -219,12 +209,17 @@ class RedBlackTree(AbstractTree):
         def inner(node: RedBlackNode) -> list[RedBlackNode]:
             if node is None:
                 return []
-            return [node.data] + inner(node.left) + inner(node.right)
+            return [*node.data] + inner(node.left) + inner(node.right)
 
         return inner(self.__root)
 
     def postorder(self) -> list[DataEntry]:
-        return super().postorder()
+        def inner(node: RedBlackNode) -> list[RedBlackNode]:
+            if node is None:
+                return []
+            return inner(node.left) + inner(node.right) + [*node.data]
+
+        return inner(self.__root)
 
 
 
