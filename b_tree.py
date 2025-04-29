@@ -96,6 +96,24 @@ class BTree(AbstractTree):
                     i += 1
             self.insert_non_full(x.child[i], data_entry)
 
+    def find(self, key, node=None):
+        """
+        Searches for a DataEntry with the specified key.
+        Returns a tuple (node, index) if found, else None.
+        """
+        node = self.root if node is None else node
+
+        i = 0
+        while i < len(node.keys) and key > node.keys[i].columns[self._key_col]:
+            i += 1
+
+        if i < len(node.keys) and key == node.keys[i].columns[self._key_col]:
+            return (node, i)
+        elif node.leaf:
+            return None
+        else:
+            return self.find(key, node.child[i])
+
 
     def erase(self, key) -> None:
         """
