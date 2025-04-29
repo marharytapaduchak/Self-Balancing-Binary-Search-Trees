@@ -1,5 +1,6 @@
 """
 Implementation of Red-Black tree
+https://youtu.be/w5cvkTXY0vQ?si=OQWCfaSMtiO05mOA
 """
 from enum import Enum
 
@@ -192,8 +193,109 @@ class RedBlackTree(AbstractTree):
 
         return None
 
-    def erase(self, key):
-        return super().erase(key)
+    def __transplant(self, u: RedBlackNode, v: RedBlackNode):
+        if u.parent is None:
+            self.__root = v
+        elif u == u.parent.left:
+            u.parent.left = v
+        else:
+            u.parent.right = v
+        u.parent = None
+
+
+    def erase(self, key) -> list[DataEntry]:
+
+        def find_key(node: RedBlackNode) -> RedBlackNode:
+            if node is None:
+                return None
+
+            if node.data[0].columns[self._key_col] == key:
+                return node
+            return find_key(node.left) or find_key(node.right)
+
+
+        # db -- Double black
+        def delete(node: RedBlackNode):
+            if node.left is not None:
+                cur = node.left
+                while cur.right is not None:
+                    cur = cur.right
+                node.data = cur.data
+                delete(cur)
+            elif node.right is not None:
+                cur = node.right
+                while cur.left is not None:
+                    cur = cur.left
+                node.data = cur.data
+                delete(cur)
+            else:
+                p = node.parent
+                if node.color == RedBlackNode.COLORS["RED"] or p is None:
+                    self.__transplant(node, None)
+                else:
+                    fix_db(node)
+
+
+
+        def fix_db(db: RedBlackNode):
+            p = db.parent
+            if p is None:
+                return
+
+            s = p.left if p.right == db else p.right
+
+            # Same as if its black with black children
+            if s is None:
+                # s.color = RedBlackNode.COLORS["RED"]
+                if p.color == RedBlackNode.COLORS["BLACK"]:
+                    fix_db(p)
+                else:
+                    p.color = RedBlackNode.COLORS["BLACK"]
+
+            elif s.color == RedBlackNode.COLORS["BLACK"]:
+                if (s.left is None or s.left.color==RedBlackNode.COLORS["BLACK"]) and  \
+                    (s.right is None or s.right.color==RedBlackNode.COLORS["BLACK"]):
+
+                    s.color = RedBlackNode.COLORS["RED"]
+                    if p.color == RedBlackNode.COLORS["BLACK"]:
+                        fix_db(p)
+                    else:
+                        p.color = RedBlackNode.COLORS["BLACK"]
+
+                if db == p.left:
+                    if s.left is not None and s.left == RedBlackNode.COLORS["RED"]:
+                        s.left.color, s.color = s.color, s.left.color
+                        self.__rotate_right(s)
+                    if s.right is not None and s.right == RedBlackNode.COLORS["RED"]:
+                        s.color, p.color, s.right.color = p.color, s.color, RedBlackNode.COLORS["BLACK"]
+                        self.__rotate_left(p)
+                else:
+                    if s.right is not None and s.right == RedBlackNode.COLORS["RED"]:
+                        s.right.color, s.color = s.color, s.right.color
+                        self.__rotate_left(s)
+                    if s.left is not None and s.left == RedBlackNode.COLORS["RED"]:
+                        s.color, p.color, s.left.color = p.color, s.color, RedBlackNode.COLORS["BLACK"]
+                        self.__rotate_right(p)
+            else:
+                p.color, s.color = s.color, p.color
+                if p.left == db:
+                    self.__rotate_left(p)
+                elif p.right == db:
+                    self.__rotate_right(p)
+                else:
+                    raise ValueError("Parent is not parent of db")
+                fix_db(db)
+                return
+
+            if db.left is None and db.right is None:
+                self.__transplant(db, None)
+
+
+
+        node = find_key(self.__root)
+        if node is None:
+            return
+        delete(node)
 
     def inorder(self) -> list[DataEntry]:
         def inner(node: RedBlackNode) -> list[RedBlackNode]:
