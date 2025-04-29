@@ -10,7 +10,7 @@ class DataEntry:
     def __init__(self, columns: list):
         self.columns = columns
 
-    def __eq__(self, another):
+    def __eq__(self, another: "DataEntry"):
         if len(self.columns) != len(another.columns):
             return False
 

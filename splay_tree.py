@@ -17,14 +17,14 @@ class SplayTreeNode(AbstractTreeNode):
         self.parent = None
 
     @property
-    def left(self):
+    def left(self) -> "SplayTreeNode":
         """
         Obtains left child node
         """
         return self.__left
 
     @left.setter
-    def left(self, new_left):
+    def left(self, new_left: "SplayTreeNode") -> None:
         """
         Sets left child node
         """
@@ -33,14 +33,14 @@ class SplayTreeNode(AbstractTreeNode):
             self.__left.parent = self
 
     @property
-    def right(self):
+    def right(self) -> "SplayTreeNode":
         """
         Obtains right child node
         """
         return self.__right
 
     @right.setter
-    def right(self, new_right):
+    def right(self, new_right: "SplayTreeNode") -> None:
         """
         Sets right child node
         """
