@@ -2,7 +2,7 @@
 Contains randomized cartesian tree (treap) representation
 """
 
-from random import random
+import random
 
 from data_entry import DataEntry
 from abstract_tree import AbstractTree, AbstractTreeNode
@@ -16,7 +16,7 @@ class TreapNode(AbstractTreeNode):
         super().__init__(data_entry)
         self.left = None
         self.right = None
-        self.priority = random()
+        self.priority = random.random()
 
 class Treap(AbstractTree):
     """
