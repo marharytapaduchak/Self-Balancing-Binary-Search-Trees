@@ -26,7 +26,7 @@ class BTree(AbstractTree):
     Represents B-tree.
     """
 
-    def __init__(self, key_col: int, t: int):
+    def __init__(self, key_col: int, t = 3):
         super().__init__(key_col)
         # Minimum degree (defines max and min keys per node)
         self.t = t
@@ -36,6 +36,10 @@ class BTree(AbstractTree):
     def root(self) -> BTreeNode | None:
         """Accessor for the tree's root node."""
         return self._root
+    
+    @root.setter
+    def root(self, node):
+        self._root = node
 
     def split_child(self, x, i):
         """

@@ -11,8 +11,9 @@ from splay_tree import SplayTree
 from avl_tree import AVLTree
 from treap import Treap
 from red_black_tree import RedBlackTree
+from b_tree import BTree
 
-TREES_FOR_TEST = [UnbalancedTree, SplayTree, AVLTree, Treap, RedBlackTree]
+TREES_FOR_TEST = [UnbalancedTree, SplayTree, AVLTree, Treap, RedBlackTree, BTree]
 
 class TestTree(unittest.TestCase):
     """
