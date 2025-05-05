@@ -46,13 +46,13 @@ class Treap(AbstractTree):
             if node is None:
                 return TreapNode(data_entry)
 
-            if data_entry.columns[self._key_col] < node.data[0].columns[self._key_col]:
+            if data_entry.columns[self.key_col] < node.data[0].columns[self.key_col]:
                 node.left = insert_recursive(node.left)
                 if node.left.priority < node.priority:
                     node = self.__rotate_right(node)
                 return node
 
-            if data_entry.columns[self._key_col] > node.data[0].columns[self._key_col]:
+            if data_entry.columns[self.key_col] > node.data[0].columns[self.key_col]:
                 node.right = insert_recursive(node.right)
                 if node.right.priority < node.priority:
                     node = self.__rotate_left(node)
@@ -70,11 +70,11 @@ class Treap(AbstractTree):
         curr_node = self.__root
 
         while True:
-            if key < curr_node.data[0].columns[self._key_col]:
+            if key < curr_node.data[0].columns[self.key_col]:
                 if curr_node.left is None:
                     return []
                 curr_node = curr_node.left
-            elif key > curr_node.data[0].columns[self._key_col]:
+            elif key > curr_node.data[0].columns[self.key_col]:
                 if curr_node.right is None:
                     return []
                 curr_node = curr_node.right
@@ -86,11 +86,11 @@ class Treap(AbstractTree):
             if node is None:
                 return None
 
-            if key < node.data[0].columns[self._key_col]:
+            if key < node.data[0].columns[self.key_col]:
                 node.left = erase_recursive(node.left)
                 return node
 
-            if key > node.data[0].columns[self._key_col]:
+            if key > node.data[0].columns[self.key_col]:
                 node.right = erase_recursive(node.right)
                 return node
 

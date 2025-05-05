@@ -77,22 +77,22 @@ class BTree(AbstractTree):
             self.insert_non_full(root, data_entry)
 
     def insert_non_full(self, x, data_entry):
-        k = data_entry.columns[self._key_col]
+        k = data_entry.columns[self.key_col]
         i = len(x.keys) - 1
 
         if x.leaf:
             x.keys.append(data_entry)
-            while i >= 0 and k < x.keys[i].columns[self._key_col]:
+            while i >= 0 and k < x.keys[i].columns[self.key_col]:
                 x.keys[i + 1] = x.keys[i]
                 i -= 1
             x.keys[i + 1] = data_entry
         else:
-            while i >= 0 and k < x.keys[i].columns[self._key_col]:
+            while i >= 0 and k < x.keys[i].columns[self.key_col]:
                 i -= 1
             i += 1
             if len(x.child[i].keys) == (2 * self.t) - 1:
                 self.split_child(x, i)
-                if k > x.keys[i].columns[self._key_col]:
+                if k > x.keys[i].columns[self.key_col]:
                     i += 1
             self.insert_non_full(x.child[i], data_entry)
 
@@ -104,10 +104,10 @@ class BTree(AbstractTree):
         node = self.root if node is None else node
 
         i = 0
-        while i < len(node.keys) and key > node.keys[i].columns[self._key_col]:
+        while i < len(node.keys) and key > node.keys[i].columns[self.key_col]:
             i += 1
 
-        if i < len(node.keys) and key == node.keys[i].columns[self._key_col]:
+        if i < len(node.keys) and key == node.keys[i].columns[self.key_col]:
             return (node, i)
         if node.leaf:
             return None

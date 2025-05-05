@@ -63,12 +63,12 @@ class AVLTree(AbstractTree):
         return new_root
 
     def __insert(self, node: AVLTreeNode, data_entry: DataEntry) -> AVLTreeNode:
-        key = data_entry.columns[self._key_col]
+        key = data_entry.columns[self.key_col]
 
         if node is None:
             return AVLTreeNode(data_entry)
 
-        node_key = node.data[0].columns[self._key_col]
+        node_key = node.data[0].columns[self.key_col]
 
         if key < node_key:
             node.left = self.__insert(node.left, data_entry)
@@ -83,14 +83,14 @@ class AVLTree(AbstractTree):
 
         # Balance the node
         if balance > 1:
-            if key < node.left.data[0].columns[self._key_col]:
+            if key < node.left.data[0].columns[self.key_col]:
                 return self.__rotate_right(node)
             else:
                 node.left = self.__rotate_left(node.left)
                 return self.__rotate_right(node)
 
         if balance < -1:
-            if key > node.right.data[0].columns[self._key_col]:
+            if key > node.right.data[0].columns[self.key_col]:
                 return self.__rotate_left(node)
             else:
                 node.right = self.__rotate_right(node.right)
@@ -111,7 +111,7 @@ class AVLTree(AbstractTree):
         if node is None:
             return None
 
-        node_key = node.data[0].columns[self._key_col]
+        node_key = node.data[0].columns[self.key_col]
 
         if key < node_key:
             node.left = self.__delete(node.left, key)
@@ -127,7 +127,7 @@ class AVLTree(AbstractTree):
             # Replace with in-order successor
             successor = self.__min_node(node.right)
             node.data = successor.data
-            node.right = self.__delete(node.right, successor.data[0].columns[self._key_col])
+            node.right = self.__delete(node.right, successor.data[0].columns[self.key_col])
 
         if node is None:
             return None
@@ -172,7 +172,7 @@ class AVLTree(AbstractTree):
             if node is None:
                 return []
 
-            node_key = node.data[0].columns[self._key_col]
+            node_key = node.data[0].columns[self.key_col]
 
             if key < node_key:
                 return __find_recursive(node.left)

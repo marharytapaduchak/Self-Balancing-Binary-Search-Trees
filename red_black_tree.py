@@ -111,9 +111,9 @@ class RedBlackTree(AbstractTree):
             if curr_node is None:
                 return []
 
-            if key < curr_node.data[0].columns[self._key_col]:
+            if key < curr_node.data[0].columns[self.key_col]:
                 curr_node = curr_node.left
-            elif key > curr_node.data[0].columns[self._key_col]:
+            elif key > curr_node.data[0].columns[self.key_col]:
                 curr_node = curr_node.right
             else:
                 return curr_node.data
@@ -167,9 +167,9 @@ class RedBlackTree(AbstractTree):
 
 
         cur = self.__root
-        key = data_entry.columns[self._key_col]
+        key = data_entry.columns[self.key_col]
         while cur is not None:
-            if key < cur.data[0].columns[self._key_col]:
+            if key < cur.data[0].columns[self.key_col]:
                 if cur.left is None:
                     cur.left = RedBlackNode(data_entry, parent=cur)
                     rebalance(cur.left)
@@ -177,7 +177,7 @@ class RedBlackTree(AbstractTree):
                 cur = cur.left
 
 
-            elif key > cur.data[0].columns[self._key_col]:
+            elif key > cur.data[0].columns[self.key_col]:
                 if cur.right is None:
                     cur.right = RedBlackNode(data_entry, parent=cur)
                     rebalance(cur.right)
@@ -209,7 +209,7 @@ class RedBlackTree(AbstractTree):
             if node is None:
                 return None
 
-            if node.data[0].columns[self._key_col] == key:
+            if node.data[0].columns[self.key_col] == key:
                 return node
             return find_key(node.left) or find_key(node.right)
 

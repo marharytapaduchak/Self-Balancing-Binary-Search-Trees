@@ -126,14 +126,14 @@ class SplayTree(AbstractTree):
         curr_node = self.__root
 
         while True:
-            if data_entry.columns[self._key_col] < curr_node.data[0].columns[self._key_col]:
+            if data_entry.columns[self.key_col] < curr_node.data[0].columns[self.key_col]:
                 if curr_node.left is None:
                     curr_node.left = SplayTreeNode(data_entry)
                     curr_node.left.parent = curr_node
                     self.__splay(curr_node.left)
                     return
                 curr_node = curr_node.left
-            elif data_entry.columns[self._key_col] > curr_node.data[0].columns[self._key_col]:
+            elif data_entry.columns[self.key_col] > curr_node.data[0].columns[self.key_col]:
                 if curr_node.right is None:
                     curr_node.right = SplayTreeNode(data_entry)
                     curr_node.right.parent = curr_node
@@ -151,12 +151,12 @@ class SplayTree(AbstractTree):
         curr_node = self.__root
 
         while True:
-            if key < curr_node.data[0].columns[self._key_col]:
+            if key < curr_node.data[0].columns[self.key_col]:
                 if curr_node.left is None:
                     self.__splay(curr_node)
                     return []
                 curr_node = curr_node.left
-            elif key > curr_node.data[0].columns[self._key_col]:
+            elif key > curr_node.data[0].columns[self.key_col]:
                 if curr_node.right is None:
                     self.__splay(curr_node)
                     return []

@@ -21,7 +21,15 @@ class AbstractTree(ABC):
     """
 
     def __init__(self, key_col: int):
-        self._key_col = key_col
+        self.__key_col = key_col
+
+    @property
+    def key_col(self):
+        """
+        Getter for key column index
+        """
+
+        return self.__key_col
 
     @abstractmethod
     def insert(self, data_entry: DataEntry) -> None:
