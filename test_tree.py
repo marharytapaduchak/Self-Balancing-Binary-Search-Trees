@@ -137,7 +137,8 @@ class TestTree(unittest.TestCase):
         """
         Tests methods preorder and postorder
         Unlike inorder, preorder and postorder are implementation-defined for different tree types,
-        so it is only possible to test data entries presence and absence, not their order
+        so it is only possible to test data entries presence and absence, not their order.
+        Does not work if inorder fails
         """
 
         tests_count = 10

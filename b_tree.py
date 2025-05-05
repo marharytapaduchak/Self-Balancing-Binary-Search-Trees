@@ -5,155 +5,163 @@ Implementing B-tree.
 from data_entry import DataEntry
 from abstract_tree import AbstractTree, AbstractTreeNode
 
-class BTreeNode(AbstractTreeNode):
-    """
-    Represents B-tree node.
-    """
-
-    def __init__(self, data_entry: DataEntry = None, leaf = False):
-        if data_entry is not None:
-            super().__init__(data_entry)
-            self.keys: list[DataEntry] = [data_entry]
-        else:
-            self.data: list[DataEntry] = []
-            self.keys: list[DataEntry] = []
-        self.leaf: bool = leaf
-        self.child: list[BTreeNode] = [] # child pointers
+class BTreeNode:
+    def __init__(self, leaf=True):
+        self.leaf = leaf
+        self.keys = []
+        self.children = []
 
 
-class BTree(AbstractTree):
-    """
-    Represents B-tree.
-    """
-
-    def __init__(self, key_col: int, t = 3):
-        super().__init__(key_col)
-        # Minimum degree (defines max and min keys per node)
+class BTree:
+    def __init__(self, key_col, t = 3):
+        self.key_col = key_col
+        self.root = BTreeNode(True)
         self.t = t
-        self._root = BTreeNode(leaf=True)
 
-    @property
-    def root(self) -> BTreeNode | None:
-        """Accessor for the tree's root node."""
-        return self._root
-    
-    @root.setter
-    def root(self, node):
-        self._root = node
+    def insert(self, k):
+        existing = self.search_key(k)
+        if existing is not None:
+            existing[0].keys[existing[1]].append(k)
+            return
 
-    def split_child(self, x, i):
-        """
-        Splits the full child x.child[i] into two and adjusts x accordingly.
-        """
-        t = self.t
-        y = x.child[i]
-        # Create new node to hold y's right half
-        z = BTreeNode(leaf=y.leaf)
-        # Median entry to move up
-        median = y.keys[t - 1]
-
-        z.keys = y.keys[t:]
-        y.keys = y.keys[:t - 1]
-
-        if not y.leaf:
-            z.child = y.child[t:]
-            y.child = y.child[:t]
-
-        x.child.insert(i + 1, z)
-        x.keys.insert(i, median)
-
-
-    def insert(self, data_entry):
-        root = self._root
-
-        # if root is full, create a new node - tree's height grows by 1
+        root = self.root
         if len(root.keys) == (2 * self.t) - 1:
-            new_root = BTreeNode(leaf=False)
-            self.root = new_root
-            new_root.child.append(root)
-            self.split_child(new_root, 0)
-            self.insert_non_full(new_root, data_entry)
+            temp = BTreeNode()
+            self.root = temp
+            temp.children.append(root)
+            self.split_child(temp, 0)
+            self.insert_non_full(temp, k)
         else:
-            self.insert_non_full(root, data_entry)
+            self.insert_non_full(root, k)
 
-    def insert_non_full(self, x, data_entry):
-        k = data_entry.columns[self.key_col]
+    def insert_non_full(self, x, k):
         i = len(x.keys) - 1
-
         if x.leaf:
-            x.keys.append(data_entry)
-            while i >= 0 and k < x.keys[i].columns[self.key_col]:
+            x.keys.append(None)  # Make space for the new key
+            while i >= 0 and k.columns[self.key_col] < x.keys[i][0].columns[self.key_col]:
                 x.keys[i + 1] = x.keys[i]
                 i -= 1
-            x.keys[i + 1] = data_entry
+            x.keys[i + 1] = [k]
         else:
-            while i >= 0 and k < x.keys[i].columns[self.key_col]:
+            while i >= 0 and k.columns[self.key_col] < x.keys[i][0].columns[self.key_col]:
                 i -= 1
             i += 1
-            if len(x.child[i].keys) == (2 * self.t) - 1:
+            if len(x.children[i].keys) == (2 * self.t) - 1:
                 self.split_child(x, i)
-                if k > x.keys[i].columns[self.key_col]:
+                if k.columns[self.key_col] > x.keys[i][0].columns[self.key_col]:
                     i += 1
-            self.insert_non_full(x.child[i], data_entry)
+            self.insert_non_full(x.children[i], k)
 
-    def find(self, key, node=None):
-        """
-        Searches for a DataEntry with the specified key.
-        Returns a tuple (node, index) if found, else None.
-        """
-        node = self.root if node is None else node
+    def search_key(self, k, x=None):
+        if x is not None:
+            i = 0
+            while i < len(x.keys) and k.columns[self.key_col] > x.keys[i][0].columns[self.key_col]:
+                i += 1
+            if i < len(x.keys) and k.columns[self.key_col] == x.keys[i][0].columns[self.key_col]:
+                return x, i
+            elif x.leaf:
+                return None
+            else:
+                return self.search_key(k, x.children[i])
+        else:
+            return self.search_key(k, self.root)
 
-        i = 0
-        while i < len(node.keys) and key > node.keys[i].columns[self.key_col]:
-            i += 1
+    def split_child(self, x, i):
+        t = self.t
+        y = x.children[i]
+        z = BTreeNode(leaf=y.leaf)
+        x.children.insert(i + 1, z)
+        x.keys.insert(i, y.keys[t - 1])
+        z.keys = y.keys[t: (2 * t) - 1]
+        y.keys = y.keys[0: t - 1]
+        if not y.leaf:
+            z.children = y.children[t: 2 * t]
+            y.children = y.children[0: t - 1]
 
-        if i < len(node.keys) and key == node.keys[i].columns[self.key_col]:
-            return (node, i)
-        if node.leaf:
-            return None
-        return self.find(key, node.child[i])
-
-
-    def erase(self, key) -> None:
-        """
-        Erases data entries from tree by key
-        """
+    def print_tree(self, x, l=0):
+        print("Level ", l, " ", len(x.keys), end=":")
+        for i in x.keys:
+            print(i, end=" ")
+        print()
+        l += 1
+        if len(x.children) > 0:
+            for i in x.children:
+                self.print_tree(i, l)
 
     def inorder(self):
-        return self._inorder(self._root)
+        def inorder_recursive(node, result):
+            if node is None:
+                return
 
-    def _inorder(self, node):
-        if node is None:
-            return []
-        res = []
-        for i, key in enumerate(node.keys):
-            if i < len(node.child):
-                res.extend(self._inorder(node.child[i]))
-            res.append(key)
-        if len(node.child) > len(node.keys):
-            res.extend(self._inorder(node.child[-1]))
-        return res
+            for i, k in enumerate(node.keys):
+                if i < len(node.children):
+                    inorder_recursive(node.children[i], result)
+                result += k
+            if len(node.children) > len(node.keys):
+                inorder_recursive(node.children[-1], result)
+
+        result = []
+
+        inorder_recursive(self.root, result)
+
+        return result
 
     def preorder(self):
-        return self._preorder(self._root)
+        def preorder_recursive(node, result):
+            if node is None:
+                return
 
-    def _preorder(self, node):
-        if node is None:
-            return []
-        res = []
-        res.extend(node.keys)
-        for c in node.child:
-            res.extend(self._preorder(c))
-        return res
+            for same_k in node.keys:
+                result += same_k
+
+            for c in node.children:
+                preorder_recursive(c, result)
+
+        result = []
+
+        preorder_recursive(self.root, result)
+
+        return result
 
     def postorder(self):
-        return self._postorder(self._root)
+        def preorder_recursive(node, result):
+            if node is None:
+                return
 
-    def _postorder(self, node):
-        if node is None:
-            return []
-        res = []
-        for c in node.child:
-            res.extend(self._postorder(c))
-        res.extend(node.keys)
-        return res
+            for c in node.children:
+                preorder_recursive(c, result)
+
+            for same_k in node.keys:
+                result += same_k
+
+        result = []
+
+        preorder_recursive(self.root, result)
+
+        return result
+
+
+def main():
+    B = BTree(0, 3)
+
+    keys = [
+        DataEntry([10]),
+        DataEntry([50]),
+        DataEntry([60]),
+        DataEntry([20]),
+        DataEntry([40]),
+        DataEntry([61]),
+        DataEntry([21]),
+        DataEntry([41])
+    ]
+    for key in keys:
+        B.insert(key)
+        B.print_tree(B.root)
+        B.inorder()
+        print()
+
+
+    print("B-tree structure:")
+    B.print_tree(B.root)
+
+main()
