@@ -23,6 +23,7 @@ class BTree:
       self.root = temp
       temp.child.append(root)
       self.split_child(temp, 0)
+      print(temp.keys)
       self.insert_non_full(temp, k)
     else:
       self.insert_non_full(root, k)
@@ -108,6 +109,13 @@ def main():
     B = BTree(3)
 
     keys = [10,
+            50,
+            60,
+            20,
+            40,
+            61,
+            21,
+            41,
             50,
             60,
             20,
