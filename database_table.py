@@ -1,5 +1,5 @@
 """
-Implements database functional
+Implements database table functional
 """
 
 from data_entry import ColumnType, DataEntry
@@ -79,17 +79,3 @@ class DatabaseTable:
         """
 
         return self.__tree
-
-if __name__ == "__main__":
-    from treap import Treap
-    from red_black_tree import RedBlackTree
-
-    table = DatabaseTable(
-        Treap(0),
-        [ColumnType.INT, ColumnType.SMALL_STRING, ColumnType.BIG_STRING]
-    )
-
-    table.tree.insert(DataEntry([123, "Name", "Description"]))
-    table.write_to_file("table.txt")
-
-    print(DatabaseTable.read_from_file(RedBlackTree, "file.txt").tree.inorder())
