@@ -18,8 +18,24 @@ class BTree:
         self.root = BTreeNode(True)
         self.t = t
 
+    def find_for_insert(self, k, x=None):
+        if hasattr(k, 'columns'):
+            key_ = k.columns[self.key_col]
+        else:
+            key_ = k
+        if x is not None:
+            i = 0
+            while i < len(x.keys) and  key_ > x.keys[i][0].columns[self.key_col]:
+                i += 1
+            if i < len(x.keys) and key_ == x.keys[i][0].columns[self.key_col]:
+                return x, i
+            elif x.leaf:
+                return None
+            return self.find_for_insert(k, x.children[i])
+        return self.find_for_insert(k, self.root)
+
     def insert(self, k):
-        existing = self.search_key(k)
+        existing = self.find_for_insert(k)
         if existing is not None:
            existing[0].keys[existing[1]].append(k)
            return
@@ -52,17 +68,21 @@ class BTree:
                     i += 1
             self.insert_non_full(x.children[i], k)
 
-    def search_key(self, k, x=None):
+    def find(self, k, x=None):
+        if hasattr(k, 'columns'):
+            key_ = k.columns[self.key_col]
+        else:
+            key_ = k
         if x is not None:
             i = 0
-            while i < len(x.keys) and k.columns[self.key_col] > x.keys[i][0].columns[self.key_col]:
+            while i < len(x.keys) and  key_ > x.keys[i][0].columns[self.key_col]:
                 i += 1
-            if i < len(x.keys) and k.columns[self.key_col] == x.keys[i][0].columns[self.key_col]:
-                return x, i
+            if i < len(x.keys) and key_ == x.keys[i][0].columns[self.key_col]:
+                return x.keys[i]
             elif x.leaf:
-                return None
-            return self.search_key(k, x.children[i])
-        return self.search_key(k, self.root)
+                return []
+            return self.find(k, x.children[i])
+        return self.find(k, self.root)
 
     def split_child(self, x, i):
         t = self.t
@@ -75,6 +95,9 @@ class BTree:
         if not y.leaf:
             z.children = y.children[t:t*2]
             y.children = y.children[:t]
+    
+    def erase(self):
+        pass
 
     def print_tree(self, x, l=0):
         print("Level ", l, " ", len(x.keys), end=":")
