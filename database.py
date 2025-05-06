@@ -80,7 +80,7 @@ class Database:
 
     def drop(self):
         """
-        Deletes database.
+        Deletes database both from memory and filesystem.
         This will delete database from filesystem immmediately, even if save() is not called
         """
 
