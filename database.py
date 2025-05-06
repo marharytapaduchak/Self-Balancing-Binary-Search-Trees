@@ -78,6 +78,16 @@ class Database:
 
         del self.__tables[table_name]
 
+    def drop(self):
+        """
+        Deletes database.
+        This will delete database from filesystem immmediately, even if save() is not called
+        """
+
+        self.__tables = {}
+        if os.path.exists(self.__db_folder_path):
+            shutil.rmtree(self.__db_folder_path)
+
     def get_tables_names(self) -> list[str]:
         """
         Gets database tables names
@@ -131,3 +141,7 @@ if __name__ == "__main__":
     print(loaded_db.get_tables_names())
     print(loaded_db.get_table_columns_names("another_table"))
     print(loaded_db.get_table("another_table").tree.inorder())
+    loaded_db.drop_table("data")
+    print(loaded_db.get_tables_names())
+    loaded_db.drop()
+    print(loaded_db.get_tables_names())
