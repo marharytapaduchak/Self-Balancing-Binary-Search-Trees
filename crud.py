@@ -7,15 +7,18 @@ from treap import Treap
 
 
 def select(db: Database, columns: list[str], table_name: str):
-    print(columns, table_name)
+    cols_list = db.get_table_columns_names(table_name)
+    cols_ind = [cols_list.index(col) for col in columns]
+
+    selected = db.get_table(table_name).tree.inorder()
+    return [[s.columns[i] for i in cols_ind] for s in selected]
 
 
 def parse_query(args: list[str], db: Database):
     args = [s.lower() for s in args]
-    func = None
     match args[0]:
         case "select":
-            i = 0
+            i = 1
             columns = []
             while i < len(args):
                 if args[i] == "from":
@@ -26,7 +29,7 @@ def parse_query(args: list[str], db: Database):
                 raise ValueError("Invalid query")
 
             table_name = args[i+1]
-            select(db, columns, table_name)
+            return select(db, columns, table_name)
         case _:
             raise ValueError("Not supported parameters")
 
@@ -93,7 +96,10 @@ if __name__ == "__main__":
     db = Database(TreeType, db_name)
     argv = argv[3:]
 
-    if argv[0] == "--help":
+    if len(argv) == 0:
+        print("Too few arguments.")
+        print("run with --help")
+    elif argv[0] == "--help":
         #TODO
         print("""
             There should be help for you
@@ -106,7 +112,7 @@ if __name__ == "__main__":
         argv = argv[1:]
 
         try:
-            parse_query(argv, db)
+            print(parse_query(argv, db))
         except Exception as e:
             print("Invalid query")
             #DEBUG TODO
