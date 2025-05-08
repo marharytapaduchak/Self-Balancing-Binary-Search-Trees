@@ -12,16 +12,15 @@ def parse_query(args: list[str], db: Database):
     match args[0]:
         case "select":
             i = 1
-            columns = []
             while i < len(args):
                 if args[i] == "from":
                     break
-                columns.append(args[i])
                 i += 1
             else:
                 raise ValueError("Invalid query")
 
             table_name = args[i+1]
+            columns = [col.strip(", \n") for col in args[1:i]]
             return db.select(columns, table_name)
         case "insert":
             if args[1] != "into":
@@ -58,6 +57,8 @@ def main(argv):
                 )
                 start_db.get_table("another_table").tree.insert(DataEntry([0, "any_name", "htrhewnifuriuofvufyewbf"]))
                 start_db.get_table("another_table").tree.insert(DataEntry([1, "another_name", "47878947fre74fr8787"]))
+                start_db.get_table("another_table").tree.insert(DataEntry([2, "another_name1", "47878947fre74fr8787"]))
+                start_db.get_table("another_table").tree.insert(DataEntry([3, "another_name2", "47878947fre74fr8787"]))
                 start_db.save()
 
             loaded_db = Database(SplayTree, "test_database")
@@ -66,7 +67,7 @@ def main(argv):
             print(loaded_db.get_table("another_table").tree.inorder())
             loaded_db.drop_table("data")
             print(loaded_db.get_tables_names())
-            loaded_db.drop()
+            # loaded_db.drop()
             print(loaded_db.get_tables_names())
             return
         else:
