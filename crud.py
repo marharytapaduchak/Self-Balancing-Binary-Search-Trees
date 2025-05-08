@@ -35,12 +35,7 @@ def parse_query(args: list[str], db: Database):
 
 
 
-if __name__ == "__main__":
-    import sys
-
-
-    argv = sys.argv
-
+def main(argv):
     if len(argv) == 1:
         print("Please provide valid arguments.")
         print("or run with --help")
@@ -73,6 +68,7 @@ if __name__ == "__main__":
             print(loaded_db.get_tables_names())
             loaded_db.drop()
             print(loaded_db.get_tables_names())
+            return
         else:
             print("Too few arguments.")
             print("run with --help")
@@ -120,3 +116,11 @@ if __name__ == "__main__":
     else:
         raise ValueError("""unsupported arguments
                          run with --help""")
+
+
+if __name__ == "__main__":
+    import sys
+
+
+    argv = sys.argv
+    main(argv)
