@@ -6,13 +6,6 @@ from splay_tree import SplayTree
 from treap import Treap
 
 
-def select(db: Database, columns: list[str], table_name: str):
-    cols_list = db.get_table_columns_names(table_name)
-    cols_ind = [cols_list.index(col) for col in columns]
-
-    selected = db.get_table(table_name).tree.inorder()
-    return [[s.columns[i] for i in cols_ind] for s in selected]
-
 
 def parse_query(args: list[str], db: Database):
     args = [s.lower() for s in args]
@@ -29,7 +22,14 @@ def parse_query(args: list[str], db: Database):
                 raise ValueError("Invalid query")
 
             table_name = args[i+1]
-            return select(db, columns, table_name)
+            return db.select(columns, table_name)
+        case "insert":
+            if args[1] != "into":
+                raise ValueError("Invalid query")
+
+            table_name = args[2]
+            columns = args[3:]
+
         case _:
             raise ValueError("Not supported parameters")
 

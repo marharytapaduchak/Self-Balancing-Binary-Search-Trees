@@ -115,6 +115,13 @@ class Database:
 
         return self.__tables[table_name][1]
 
+    def select(self, columns: list[str], table_name: str):
+        cols_list = self.get_table_columns_names(table_name)
+        cols_ind = [cols_list.index(col) for col in columns]
+
+        selected = self.get_table(table_name).tree.inorder()
+        return [[s.columns[i] for i in cols_ind] for s in selected]
+
 if __name__ == "__main__":
     from treap import Treap
     from splay_tree import SplayTree
