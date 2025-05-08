@@ -5,7 +5,7 @@ Implements database functional
 import os
 import shutil
 from database_table import DatabaseTable
-
+from data_entry import ColumnType, DataEntry
 class Database:
     """
     Represents database
@@ -122,10 +122,17 @@ class Database:
         selected = self.get_table(table_name).tree.inorder()
         return [[s.columns[i] for i in cols_ind] for s in selected]
 
+    def insert(self, table_name: str, values: list):
+        if table_name not in self.__tables:
+            raise RuntimeError(f"Table with name \"{table_name}\" does not exist.")
+
+        self.get_table(table_name).tree.insert(DataEntry(values))
+        self.save()
+
 if __name__ == "__main__":
     from treap import Treap
     from splay_tree import SplayTree
-    from data_entry import ColumnType, DataEntry
+
 
     start_db = Database(Treap, "test_database")
 

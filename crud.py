@@ -8,7 +8,9 @@ from treap import Treap
 
 
 def parse_query(args: list[str], db: Database):
-    args = [s.lower() for s in args]
+    args = [s.lower().strip("(),") for s in args]
+    args = [int(s) if s.isnumeric() else s for s in args]
+
     match args[0]:
         case "select":
             i = 1
@@ -20,14 +22,21 @@ def parse_query(args: list[str], db: Database):
                 raise ValueError("Invalid query")
 
             table_name = args[i+1]
-            columns = [col.strip(", \n") for col in args[1:i]]
+            columns = args[1:i]
             return db.select(columns, table_name)
         case "insert":
             if args[1] != "into":
                 raise ValueError("Invalid query")
 
             table_name = args[2]
-            columns = args[3:]
+            values = args[3:]
+            if values[0] != "values":
+                raise ValueError("Invalid query")
+            values = values[1:]
+
+            db.insert(table_name, values)
+
+
 
         case _:
             raise ValueError("Not supported parameters")
@@ -122,6 +131,7 @@ def main(argv):
 if __name__ == "__main__":
     import sys
 
-
+    # python crud.py test_database rb -q select description id name from another_table
+    # python crud.py test_database rb -q insert into another_table values 5 mama stranger
     argv = sys.argv
     main(argv)
