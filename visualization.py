@@ -12,7 +12,6 @@ from data_entry import DataEntry
 from avl_tree import AVLTree
 from splay_tree import SplayTree
 from treap import Treap
-from red_black_tree import RedBlackTree
 from b_tree import SmallBTree
 from b_tree import MediumBTree
 from b_tree import BigBTree
@@ -255,7 +254,7 @@ class TreeBenchmark:
 
         for i, (cls, tree_name) in enumerate(self.tree_classes):
             style = styles[i % len(styles)]
-            axs[0].semilogy(sizes, insert_results[tree_name], style, label=tree_name)
+            axs[0].loglog(sizes, insert_results[tree_name], style, label=tree_name)
         axs[0].set_title('Insert Performance (Log Scale)')
         axs[0].set_xlabel('Tree Size (log)')
         axs[0].set_ylabel('Time (log)')
@@ -264,7 +263,7 @@ class TreeBenchmark:
 
         for i, (cls, tree_name) in enumerate(self.tree_classes):
             style = styles[i % len(styles)]
-            axs[1].semilogy(sizes, find_results[tree_name], style, label=tree_name)
+            axs[1].loglog(sizes, find_results[tree_name], style, label=tree_name)
         axs[1].set_title('Find Performance (Log Scale)')
         axs[1].set_xlabel('Tree Size (log)')
         axs[1].set_ylabel('Time (log)')
@@ -273,7 +272,7 @@ class TreeBenchmark:
 
         for i, (cls, tree_name) in enumerate(self.tree_classes):
             style = styles[i % len(styles)]
-            axs[2].semilogy(sizes, erase_results[tree_name], style, label=tree_name)
+            axs[2].loglog(sizes, erase_results[tree_name], style, label=tree_name)
         axs[2].set_title('Erase Performance (Log Scale)')
         axs[2].set_xlabel('Tree Size (log)')
         axs[2].set_ylabel('Time (log)')
@@ -338,7 +337,6 @@ def main():
         (AVLTree, "AVL tree"),
         (SplayTree, "Splay tree"),
         (Treap, "Treap"),
-        (RedBlackTree, "Red-Black tree"),
         (SmallBTree, "B-tree (m = 10)"),
         (MediumBTree, "B-tree (m = 35)"),
         (BigBTree, "B-tree (m = 100)"),

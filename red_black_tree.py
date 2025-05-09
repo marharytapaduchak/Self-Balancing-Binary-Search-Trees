@@ -1,3 +1,7 @@
+"""
+Implementation of Red-Black tree
+https://youtu.be/w5cvkTXY0vQ?si=OQWCfaSMtiO05mOA
+"""
 from enum import Enum
 
 from data_entry import DataEntry
@@ -5,14 +9,24 @@ from abstract_tree import AbstractTree, AbstractTreeNode
 
 
 class RedBlackNode(AbstractTreeNode):
+    """
+    Node in Red-Black tree
+    """
     COLORS = Enum("Colors", [("BLACK", 0), ("RED", 1)])
-
-    def __init__(self, data: DataEntry, key, color: int = 1,
-                 left: "RedBlackNode" = None, right: "RedBlackNode" = None, parent: "RedBlackNode" = None):
+    def __init__(self,
+                 data: DataEntry, color: int=1,
+                 left: "RedBlackNode"=None, right: "RedBlackNode"=None, parent: "RedBlackNode"=None
+                 ):
+        """
+        color should match enum
+        COLORS = Enum("Colors", [("BLACK", 0), ("RED", 1)])
+        """
         super().__init__(data)
         self._left = left
         self._right = right
         self.parent = parent
+        if color not in self.COLORS:
+            raise ValueError('color should match Enum("Colors", [("BLACK", 0), ("RED", 1)])')
         self.color = color
 
     def __eq__(self, other: "RedBlackNode") -> bool:
@@ -42,14 +56,13 @@ class RedBlackNode(AbstractTreeNode):
 
 
 class RedBlackTree(AbstractTree):
+    """
+    Red-Black tree
+    """
     def __init__(self, key_col: int):
         super().__init__(key_col)
         self.__root: RedBlackNode = None
 
-    def __node_color(self, node: RedBlackNode):
-        if node is None:
-            return RedBlackNode.COLORS.BLACK.value
-        return node.color
 
     def __rotate_left(self, node: RedBlackNode):
         if node is None:
@@ -60,6 +73,7 @@ class RedBlackTree(AbstractTree):
         right.left = node
 
         if par is None:
+            right.color = RedBlackNode.COLORS["BLACK"].value
             right.parent = None
             self.__root = right
         else:
@@ -77,6 +91,7 @@ class RedBlackTree(AbstractTree):
         left.right = node
 
         if par is None:
+            left.color = RedBlackNode.COLORS["BLACK"].value
             left.parent = None
             self.__root = left
         else:
@@ -85,81 +100,98 @@ class RedBlackTree(AbstractTree):
             else:
                 par.left = left
 
+
+
+
+
     def find(self, key) -> list[DataEntry]:
         curr_node = self.__root
-        while curr_node is not None:
+
+        while True:
+            if curr_node is None:
+                return []
+
             if key < curr_node.data[0].columns[self.key_col]:
                 curr_node = curr_node.left
             elif key > curr_node.data[0].columns[self.key_col]:
                 curr_node = curr_node.right
             else:
                 return curr_node.data
-        return []
 
-    def insert(self, data_entry: DataEntry) -> None | DataEntry:
-        key = data_entry.columns[self.key_col]
+    def insert(self, data_entry: DataEntry) -> None|DataEntry:
+        """
+        returns DataEntry if key from data_entry is already in the tree
+        """
         if self.__root is None:
-            self.__root = RedBlackNode(data_entry, key, RedBlackNode.COLORS.BLACK.value)
+            self.__root = RedBlackNode(data_entry, RedBlackNode.COLORS["BLACK"])
             return None
 
-        node = self.__root
-        parent = None
-        while node is not None:
-            parent = node
-            if key < node.data[0].columns[self.key_col]:
-                node = node.left
-            elif key > node.data[0].columns[self.key_col]:
-                node = node.right
-            else:
-                node.data.append(data_entry)
-                return None
-
-        new_node = RedBlackNode(data_entry, key, RedBlackNode.COLORS.RED.value, parent=parent)
-        if key < parent.data[0].columns[self.key_col]:
-            parent.left = new_node
-        else:
-            parent.right = new_node
-
-        self.__insert_fixup(new_node)
-        return None
-
-    def __insert_fixup(self, node: RedBlackNode):
-        while node != self.__root and node.parent.color == RedBlackNode.COLORS.RED.value:
+        def rebalance(node: RedBlackNode):
             parent = node.parent
-            gp = parent.parent
-            if parent == gp.left:
-                uncle = gp.right
-                if uncle is not None and uncle.color == RedBlackNode.COLORS.RED.value:
-                    parent.color = RedBlackNode.COLORS.BLACK.value
-                    uncle.color = RedBlackNode.COLORS.BLACK.value
-                    gp.color = RedBlackNode.COLORS.RED.value
-                    node = gp
-                else:
-                    if node == parent.right:
-                        node = parent
-                        self.__rotate_left(node)
-                        parent = node.parent
-                        gp = parent.parent
-                    parent.color = RedBlackNode.COLORS.BLACK.value
-                    gp.color = RedBlackNode.COLORS.RED.value
-                    self.__rotate_right(gp)
-            else:
-                uncle = gp.left
-                if uncle is not None and uncle.color == RedBlackNode.COLORS.RED.value:
-                    parent.color = RedBlackNode.COLORS.BLACK.value
-                    uncle.color = RedBlackNode.COLORS.BLACK.value
-                    gp.color = RedBlackNode.COLORS.RED.value
-                    node = gp
-                else:
+
+            while parent is not None and parent.color != RedBlackNode.COLORS["BLACK"]:
+                grandpar = parent.parent
+                if grandpar is None:
+                    if parent.left is None or parent.right is None:
+                        return
                     if node == parent.left:
-                        node = parent
-                        self.__rotate_right(node)
-                        parent = node.parent
-                        gp = parent.parent
-                    parent.color = RedBlackNode.COLORS.BLACK.value
-                    gp.color = RedBlackNode.COLORS.RED.value
-                    self.__rotate_left(gp)
-        self.__root.color = RedBlackNode.COLORS.BLACK.value
+                        node.color = parent.right.color
+                    else:
+                        node.color = parent.left.color
+                    return
+
+                if grandpar.left is not None and grandpar.right is not None and \
+                        grandpar.left.color == grandpar.right.color:
+
+                    grandpar.left.color = grandpar.right.color = RedBlackNode.COLORS["BLACK"]
+                    grandpar.color = RedBlackNode.COLORS["RED"]
+                    node = grandpar
+
+                elif grandpar.left == parent:
+                    if parent.right == node:
+                        self.__rotate_left(parent)
+
+                    self.__rotate_right(grandpar)
+                #elif grandpar.right == parent:
+                else:
+                    if parent.left == node:
+                        self.__rotate_right(parent)
+
+                    self.__rotate_left(grandpar)
+
+                parent = node.parent
+
+            if parent is None:
+                node.color = RedBlackNode.COLORS["BLACK"].value
+
+
+
+        cur = self.__root
+        key = data_entry.columns[self.key_col]
+        while cur is not None:
+            if key < cur.data[0].columns[self.key_col]:
+                if cur.left is None:
+                    cur.left = RedBlackNode(data_entry, parent=cur)
+                    rebalance(cur.left)
+                    break
+                cur = cur.left
+
+
+            elif key > cur.data[0].columns[self.key_col]:
+                if cur.right is None:
+                    cur.right = RedBlackNode(data_entry, parent=cur)
+                    rebalance(cur.right)
+                    break
+                cur = cur.right
+
+
+            else:
+                cur.data.append(data_entry)
+                break
+
+
+
+        return None
 
     def __transplant(self, u: RedBlackNode, v: RedBlackNode):
         if u.parent is None:
@@ -168,140 +200,129 @@ class RedBlackTree(AbstractTree):
             u.parent.left = v
         else:
             u.parent.right = v
-        if v is not None:
-            v.parent = u.parent
         u.parent = None
 
-    def __find_node(self, key) -> RedBlackNode:
-        current = self.__root
-        while current is not None:
-            if key < current.data[0].columns[self.key_col]:
-                current = current.left
-            elif key > current.data[0].columns[self.key_col]:
-                current = current.right
-            else:
-                return current
-        return None
-
-    def __minimum(self, node: RedBlackNode) -> RedBlackNode:
-        while node.left is not None:
-            node = node.left
-        return node
 
     def erase(self, key) -> list[DataEntry]:
-        z = self.__find_node(key)
-        if z is None:
-            return []
 
-        removed = z.data[:]
-        y = z
-        y_original_color = y.color
+        def find_key(node: RedBlackNode) -> RedBlackNode:
+            if node is None:
+                return None
 
-        if z.left is None:
-            x = z.right
-            parent = z.parent
-            self.__transplant(z, z.right)
-        elif z.right is None:
-            x = z.left
-            parent = z.parent
-            self.__transplant(z, z.left)
-        else:
-            y = self.__minimum(z.right)
-            y_original_color = y.color
-            x = y.right
-            if y.parent == z:
-                parent = y
+            if node.data[0].columns[self.key_col] == key:
+                return node
+            return find_key(node.left) or find_key(node.right)
+
+
+        # db -- Double black
+        def delete(node: RedBlackNode):
+            if node.left is not None:
+                cur = node.left
+                while cur.right is not None:
+                    cur = cur.right
+                node.data = cur.data
+                delete(cur)
+            elif node.right is not None:
+                cur = node.right
+                while cur.left is not None:
+                    cur = cur.left
+                node.data = cur.data
+                delete(cur)
             else:
-                self.__transplant(y, y.right)
-                y.right = z.right
-                if y.right is not None:
-                    y.right.parent = y
-                parent = y.parent
-            self.__transplant(z, y)
-            y.left = z.left
-            if y.left is not None:
-                y.left.parent = y
-            y.color = z.color
-
-        if y_original_color == RedBlackNode.COLORS.BLACK.value:
-            fix_parent = x.parent if x is not None else parent
-            self.__delete_fixup(x, fix_parent)
-        return removed
-
-    def __delete_fixup(self, x: RedBlackNode, parent: RedBlackNode):
-        while x != self.__root and self.__node_color(x) == RedBlackNode.COLORS.BLACK.value:
-            if parent is not None and x == parent.left:
-                w = parent.right
-                if w is None:
-                    x = parent
-                    parent = x.parent
-                    continue
-                if (self.__node_color(getattr(w, 'left', None)) == RedBlackNode.COLORS.BLACK.value and
-                    self.__node_color(getattr(w, 'right', None)) == RedBlackNode.COLORS.BLACK.value):
-                    w.color = RedBlackNode.COLORS.RED.value
-                    x = parent
-                    parent = x.parent
+                p = node.parent
+                if node.color == RedBlackNode.COLORS["RED"] or p is None:
+                    self.__transplant(node, None)
                 else:
-                    if self.__node_color(getattr(w, 'right', None)) == RedBlackNode.COLORS.BLACK.value:
-                        if getattr(w, 'left', None) is not None:
-                            w.left.color = RedBlackNode.COLORS.BLACK.value
-                        w.color = RedBlackNode.COLORS.RED.value
-                        self.__rotate_right(w)
-                        w = parent.right
-                    w.color = parent.color
-                    parent.color = RedBlackNode.COLORS.BLACK.value
-                    if getattr(w, 'right', None) is not None:
-                        w.right.color = RedBlackNode.COLORS.BLACK.value
-                    self.__rotate_left(parent)
-                    x = self.__root
-                    break
+                    fix_db(node)
+
+
+
+        def fix_db(db: RedBlackNode):
+            p = db.parent
+            if p is None:
+                return
+
+            s = p.left if p.right == db else p.right
+
+            # Same as if its black with black children
+            if s is None:
+                # s.color = RedBlackNode.COLORS["RED"]
+                if p.color == RedBlackNode.COLORS["BLACK"]:
+                    fix_db(p)
+                else:
+                    p.color = RedBlackNode.COLORS["BLACK"]
+
+            elif s.color == RedBlackNode.COLORS["BLACK"]:
+                if (s.left is None or s.left.color==RedBlackNode.COLORS["BLACK"]) and  \
+                    (s.right is None or s.right.color==RedBlackNode.COLORS["BLACK"]):
+
+                    s.color = RedBlackNode.COLORS["RED"]
+                    if p.color == RedBlackNode.COLORS["BLACK"]:
+                        fix_db(p)
+                    else:
+                        p.color = RedBlackNode.COLORS["BLACK"]
+
+                if db == p.left:
+                    if s.left is not None and s.left == RedBlackNode.COLORS["RED"]:
+                        s.left.color, s.color = s.color, s.left.color
+                        self.__rotate_right(s)
+                    if s.right is not None and s.right == RedBlackNode.COLORS["RED"]:
+                        s.color, p.color, s.right.color = p.color, s.color, RedBlackNode.COLORS["BLACK"]
+                        self.__rotate_left(p)
+                else:
+                    if s.right is not None and s.right == RedBlackNode.COLORS["RED"]:
+                        s.right.color, s.color = s.color, s.right.color
+                        self.__rotate_left(s)
+                    if s.left is not None and s.left == RedBlackNode.COLORS["RED"]:
+                        s.color, p.color, s.left.color = p.color, s.color, RedBlackNode.COLORS["BLACK"]
+                        self.__rotate_right(p)
             else:
-                if parent is None:
-                    break
-                w = parent.left
-                if w is None:
-                    x = parent
-                    parent = x.parent
-                    continue
-                if (self.__node_color(getattr(w, 'right', None)) == RedBlackNode.COLORS.BLACK.value and
-                    self.__node_color(getattr(w, 'left', None)) == RedBlackNode.COLORS.BLACK.value):
-                    w.color = RedBlackNode.COLORS.RED.value
-                    x = parent
-                    parent = x.parent
+                p.color, s.color = s.color, p.color
+                if p.left == db:
+                    self.__rotate_left(p)
+                elif p.right == db:
+                    self.__rotate_right(p)
                 else:
-                    if self.__node_color(getattr(w, 'left', None)) == RedBlackNode.COLORS.BLACK.value:
-                        if getattr(w, 'right', None) is not None:
-                            w.right.color = RedBlackNode.COLORS.BLACK.value
-                        w.color = RedBlackNode.COLORS.RED.value
-                        self.__rotate_left(w)
-                        w = parent.left
-                    w.color = parent.color
-                    parent.color = RedBlackNode.COLORS.BLACK.value
-                    if getattr(w, 'left', None) is not None:
-                        w.left.color = RedBlackNode.COLORS.BLACK.value
-                    self.__rotate_right(parent)
-                    x = self.__root
-                    break
-        if x is not None:
-            x.color = RedBlackNode.COLORS.BLACK.value
+                    raise ValueError("Parent is not parent of db")
+                fix_db(db)
+                return
+
+            if db.left is None and db.right is None:
+                self.__transplant(db, None)
+
+
+
+        node = find_key(self.__root)
+        if node is None:
+            return
+        delete(node)
 
     def inorder(self) -> list[DataEntry]:
-        def inner(node: RedBlackNode) -> list[DataEntry]:
+        def inner(node: RedBlackNode) -> list[RedBlackNode]:
             if node is None:
                 return []
             return inner(node.left) + [*node.data] + inner(node.right)
+
         return inner(self.__root)
 
+
+
     def preorder(self) -> list[DataEntry]:
-        def inner(node: RedBlackNode) -> list[DataEntry]:
+        def inner(node: RedBlackNode) -> list[RedBlackNode]:
             if node is None:
                 return []
             return [*node.data] + inner(node.left) + inner(node.right)
+
         return inner(self.__root)
 
     def postorder(self) -> list[DataEntry]:
-        def inner(node: RedBlackNode) -> list[DataEntry]:
+        def inner(node: RedBlackNode) -> list[RedBlackNode]:
             if node is None:
                 return []
             return inner(node.left) + inner(node.right) + [*node.data]
+
         return inner(self.__root)
+
+
+
+
