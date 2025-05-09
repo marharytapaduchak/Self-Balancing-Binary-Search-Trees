@@ -16,24 +16,20 @@ class GeneralBTree(AbstractTree):
     def _key_value(self, bucket):
         return bucket[0].columns[self.key_col]
 
-    def find_for_insert(self, k, x=None):
-        if hasattr(k, 'columns'):
-            key_ = k.columns[self.key_col]
-        else:
-            key_ = k
+    def __find_for_insert(self, k, x=None):
         if x is not None:
             i = 0
-            while i < len(x.data) and key_ > x.data[i][0].columns[self.key_col]:
+            while i < len(x.data) and k.columns[self.key_col] > x.data[i][0].columns[self.key_col]:
                 i += 1
-            if i < len(x.data) and key_ == x.data[i][0].columns[self.key_col]:
+            if i < len(x.data) and k.columns[self.key_col] == x.data[i][0].columns[self.key_col]:
                 return x, i
             elif x.leaf:
                 return None
-            return self.find_for_insert(k, x.children[i])
-        return self.find_for_insert(k, self.root)
+            return self.__find_for_insert(k, x.children[i])
+        return self.__find_for_insert(k, self.root)
 
     def insert(self, k):
-        existing = self.find_for_insert(k)
+        existing = self.__find_for_insert(k)
         if existing is not None:
             existing[0].data[existing[1]].append(k)
             return
