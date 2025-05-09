@@ -12,6 +12,7 @@ from data_entry import DataEntry
 from avl_tree import AVLTree
 from splay_tree import SplayTree
 from treap import Treap
+from red_black_tree import RedBlackTree
 from b_tree import SmallBTree
 from b_tree import MediumBTree
 from b_tree import BigBTree
@@ -25,7 +26,7 @@ class TreeBenchmark:
     def __init__(self, tree_classes: dict):
         """
         Initialize benchmark with tree classes to test.
-        
+
         Args:
             tree_classes: List of tree classes that inherit from AbstractTree
         """
@@ -34,11 +35,11 @@ class TreeBenchmark:
     def generate_data_entries(self, count: int, cols_count: int, random_factor: int = 50) -> DataEntry:
         """
         Generate sequencial, but partially randomized data entries for testing.
-        
+
         Args:
             count: Number of data entries to generate
             cols_count: Number of columns in each data entry
-            
+
         Returns:
             List of sequencial, but partially randomized DataEntry objects
         """
@@ -51,12 +52,12 @@ class TreeBenchmark:
     def measure_insert_performance(self, sizes: list, cols_count: int = 5, repeats: int = 1):
         """
         Measure insert operation performance across different tree sizes.
-        
+
         Args:
             sizes: List of different sizes to test
             cols_count: Number of columns in data entries
             repeats: Number of times to repeat each test for averaging
-            
+
         Returns:
             Dictionary mapping tree names to lists of average execution times
         """
@@ -88,13 +89,13 @@ class TreeBenchmark:
     def measure_find_performance(self, sizes: list, cols_count: int = 5, search_ratio: float = 1.0, repeats: int = 1):
         """
         Measure find operation performance across different tree sizes.
-        
+
         Args:
             sizes: List of different sizes to test
             cols_count: Number of columns in data entries
             search_count: Number of search operations to perform
             repeats: Number of times to repeat each test for averaging
-            
+
         Returns:
             Dictionary mapping tree names to lists of average execution times
         """
@@ -130,13 +131,13 @@ class TreeBenchmark:
                                 erase_ratio: float = 1.0, repeats: int = 1):
         """
         Measure erase operation performance across different tree sizes.
-        
+
         Args:
             sizes: List of different sizes to test
             cols_count: Number of columns in data entries
             erase_ratio: Fraction of entries to erase
             repeats: Number of times to repeat each test for averaging
-            
+
         Returns:
             Dictionary mapping tree names to lists of average execution times
         """
@@ -171,10 +172,10 @@ class TreeBenchmark:
     def run_all_benchmarks(self, sizes: int):
         """
         Run all benchmark tests.
-        
+
         Args:
             sizes: List of different tree sizes to test
-            
+
         Returns:
             Tuple of dictionaries with results for insert, find, and erase operations
         """
@@ -189,7 +190,7 @@ class TreeBenchmark:
                     save_path: str = None) -> None:
         """
         Plot benchmark results.
-        
+
         Args:
             sizes: List of sizes tested
             insert_results: Dictionary of insert timing results
@@ -240,7 +241,7 @@ class TreeBenchmark:
                          save_path: str = None) -> None:
         """
         Plot benchmark results with logarithmic scales for clearer comparison.
-        
+
         Args:
             sizes: List of sizes tested
             insert_results: Dictionary of insert timing results
@@ -291,7 +292,7 @@ class TreeBenchmark:
                            size_index: int = -1, save_path: str = None) -> None:
         """
         Create bar chart comparing tree performance for a specific size.
-        
+
         Args:
             sizes: List of sizes tested
             insert_results: Dictionary of insert timing results
@@ -337,6 +338,7 @@ def main():
         (AVLTree, "AVL tree"),
         (SplayTree, "Splay tree"),
         (Treap, "Treap"),
+        (RedBlackTree, "Red-black tree"),
         (SmallBTree, "B-tree (m = 10)"),
         (MediumBTree, "B-tree (m = 35)"),
         (BigBTree, "B-tree (m = 100)"),
