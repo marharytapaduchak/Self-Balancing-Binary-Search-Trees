@@ -9,7 +9,7 @@ tree-based database implementations. It supports multiple tree data structures
 from typing import List, Union, Any, Optional, Tuple
 from database import Database
 from avl_tree import AVLTree
-from b_tree import BTree
+from b_tree import SmallBTree, MediumBTree, BigBTree, TwoThreeTree
 from red_black_tree import RedBlackTree
 from splay_tree import SplayTree
 from treap import Treap
@@ -192,7 +192,10 @@ def show_help():
 
     Tree Types:
       avl        - AVL Tree
-      b, btree   - B-Tree
+      sb, small-btree - B-Tree with m = 10
+      mb, medium-btree - B-Tree with m = 35
+      bb, big-btree - B-Tree with m = 100
+      b23, two-three-tree - B-Tree with m = 3 (two-three tree)
       rb, red-black - Red-Black Tree
       sp, splay  - Splay Tree
       tr, treap  - Treap
@@ -334,8 +337,14 @@ def get_tree_class(tree_name: str):
     match tree_name.lower():
         case "avl":
             return AVLTree
-        case "b" | "btree":
-            return BTree
+        case "sb" | "small-btree":
+            return SmallBTree
+        case "mb" | "medium-btree":
+            return MediumBTree
+        case "bb" | "big-btree":
+            return BigBTree
+        case "b23" | "two-three-tree":
+            return TwoThreeTree
         case "rb" | "red-black":
             return RedBlackTree
         case "sp" | "splay":

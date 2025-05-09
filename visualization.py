@@ -310,7 +310,7 @@ class TreeBenchmark:
         x = np.arange(len(self.tree_classes))
         width = 0.25
 
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(12, 6))
         insert_bars = ax.bar(x - width, insert_times, width, label='Insert')
         find_bars = ax.bar(x, find_times, width, label='Find')
         erase_bars = ax.bar(x + width, erase_times, width, label='Erase')
@@ -347,7 +347,7 @@ def main():
 
     benchmark = TreeBenchmark(tree_classes)
 
-    sizes = [10000, 20000, 30000, 40000, 50000]
+    sizes = range(10000, 100001, 10000)
 
     print("Starting benchmarks...")
     insert_results, find_results, erase_results = benchmark.run_all_benchmarks(sizes)
