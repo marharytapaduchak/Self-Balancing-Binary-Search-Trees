@@ -123,13 +123,13 @@ class RedBlackTree(AbstractTree):
         returns DataEntry if key from data_entry is already in the tree
         """
         if self.__root is None:
-            self.__root = RedBlackNode(data_entry, RedBlackNode.COLORS["BLACK"])
+            self.__root = RedBlackNode(data_entry, RedBlackNode.COLORS["BLACK"].value)
             return None
 
         def rebalance(node: RedBlackNode):
             parent = node.parent
 
-            while parent is not None and parent.color != RedBlackNode.COLORS["BLACK"]:
+            while parent is not None and parent.color == RedBlackNode.COLORS["RED"].value:
                 grandpar = parent.parent
                 if grandpar is None:
                     if parent.left is None or parent.right is None:
@@ -143,21 +143,25 @@ class RedBlackTree(AbstractTree):
                 if grandpar.left is not None and grandpar.right is not None and \
                         grandpar.left.color == grandpar.right.color:
 
-                    grandpar.left.color = grandpar.right.color = RedBlackNode.COLORS["BLACK"]
-                    grandpar.color = RedBlackNode.COLORS["RED"]
+                    grandpar.left.color = grandpar.right.color = RedBlackNode.COLORS["BLACK"].value
+                    grandpar.color = RedBlackNode.COLORS["RED"].value
                     node = grandpar
 
                 elif grandpar.left == parent:
                     if parent.right == node:
                         self.__rotate_left(parent)
-
-                    self.__rotate_right(grandpar)
+                        node = parent
+                    else:
+                        grandpar.color, parent.color = parent.color, grandpar.color
+                        self.__rotate_right(grandpar)
                 #elif grandpar.right == parent:
                 else:
                     if parent.left == node:
                         self.__rotate_right(parent)
-
-                    self.__rotate_left(grandpar)
+                        node = parent
+                    else:
+                        grandpar.color, parent.color = parent.color, grandpar.color
+                        self.__rotate_left(grandpar)
 
                 parent = node.parent
 
@@ -205,14 +209,16 @@ class RedBlackTree(AbstractTree):
 
     def erase(self, key) -> list[DataEntry]:
 
-        def find_key(node: RedBlackNode) -> RedBlackNode:
-            if node is None:
-                return None
-
-            if node.data[0].columns[self.key_col] == key:
-                return node
-            return find_key(node.left) or find_key(node.right)
-
+        def find_key(key):
+            curr_node = self.__root
+            while curr_node is not None:
+                if key < curr_node.data[0].columns[self.key_col]:
+                    curr_node = curr_node.left
+                elif key > curr_node.data[0].columns[self.key_col]:
+                    curr_node = curr_node.right
+                else:
+                    return curr_node
+            return None
 
         # db -- Double black
         def delete(node: RedBlackNode):
@@ -230,7 +236,7 @@ class RedBlackTree(AbstractTree):
                 delete(cur)
             else:
                 p = node.parent
-                if node.color == RedBlackNode.COLORS["RED"] or p is None:
+                if node.color == RedBlackNode.COLORS["RED"].value or p is None:
                     self.__transplant(node, None)
                 else:
                     fix_db(node)
@@ -246,35 +252,35 @@ class RedBlackTree(AbstractTree):
 
             # Same as if its black with black children
             if s is None:
-                # s.color = RedBlackNode.COLORS["RED"]
-                if p.color == RedBlackNode.COLORS["BLACK"]:
+                # s.color = RedBlackNode.COLORS["RED"].value
+                if p.color == RedBlackNode.COLORS["BLACK"].value:
                     fix_db(p)
                 else:
-                    p.color = RedBlackNode.COLORS["BLACK"]
+                    p.color = RedBlackNode.COLORS["BLACK"].value
 
-            elif s.color == RedBlackNode.COLORS["BLACK"]:
-                if (s.left is None or s.left.color==RedBlackNode.COLORS["BLACK"]) and  \
-                    (s.right is None or s.right.color==RedBlackNode.COLORS["BLACK"]):
+            elif s.color == RedBlackNode.COLORS["BLACK"].value:
+                if (s.left is None or s.left.color==RedBlackNode.COLORS["BLACK"].value) and  \
+                    (s.right is None or s.right.color==RedBlackNode.COLORS["BLACK"].value):
 
-                    s.color = RedBlackNode.COLORS["RED"]
-                    if p.color == RedBlackNode.COLORS["BLACK"]:
+                    s.color = RedBlackNode.COLORS["RED"].value
+                    if p.color == RedBlackNode.COLORS["BLACK"].value:
                         fix_db(p)
                     else:
-                        p.color = RedBlackNode.COLORS["BLACK"]
+                        p.color = RedBlackNode.COLORS["BLACK"].value
 
                 if db == p.left:
-                    if s.left is not None and s.left == RedBlackNode.COLORS["RED"]:
+                    if s.left is not None and s.left.color == RedBlackNode.COLORS["RED"].value:
                         s.left.color, s.color = s.color, s.left.color
                         self.__rotate_right(s)
-                    if s.right is not None and s.right == RedBlackNode.COLORS["RED"]:
-                        s.color, p.color, s.right.color = p.color, s.color, RedBlackNode.COLORS["BLACK"]
+                    if s.right is not None and s.right.color == RedBlackNode.COLORS["RED"].value:
+                        s.color, p.color, s.right.color = p.color, s.color, RedBlackNode.COLORS["BLACK"].value
                         self.__rotate_left(p)
                 else:
-                    if s.right is not None and s.right == RedBlackNode.COLORS["RED"]:
+                    if s.right is not None and s.right.color == RedBlackNode.COLORS["RED"].value:
                         s.right.color, s.color = s.color, s.right.color
                         self.__rotate_left(s)
-                    if s.left is not None and s.left == RedBlackNode.COLORS["RED"]:
-                        s.color, p.color, s.left.color = p.color, s.color, RedBlackNode.COLORS["BLACK"]
+                    if s.left is not None and s.left.color == RedBlackNode.COLORS["RED"].value:
+                        s.color, p.color, s.left.color = p.color, s.color, RedBlackNode.COLORS["BLACK"].value
                         self.__rotate_right(p)
             else:
                 p.color, s.color = s.color, p.color
@@ -292,7 +298,7 @@ class RedBlackTree(AbstractTree):
 
 
 
-        node = find_key(self.__root)
+        node = find_key(key)
         if node is None:
             return
         delete(node)
