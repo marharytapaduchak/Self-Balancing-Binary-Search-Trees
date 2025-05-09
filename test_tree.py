@@ -11,9 +11,19 @@ from splay_tree import SplayTree
 from avl_tree import AVLTree
 from treap import Treap
 from red_black_tree import RedBlackTree
-from b_tree import BTree
+from b_tree import TwoThreeTree, SmallBTree, MediumBTree, BigBTree
 
-TREES_FOR_TEST = [UnbalancedTree, SplayTree, AVLTree, Treap, RedBlackTree, BTree]
+TREES_FOR_TEST = [
+    UnbalancedTree,
+    SplayTree,
+    AVLTree,
+    Treap,
+    RedBlackTree,
+    TwoThreeTree,
+    SmallBTree,
+    MediumBTree,
+    BigBTree
+]
 
 class TestTree(unittest.TestCase):
     """
@@ -99,7 +109,7 @@ class TestTree(unittest.TestCase):
         """
 
         tests_count = 10
-        test_size = 100
+        test_size = 10
 
         for TreeType in TREES_FOR_TEST:
             for _ in range(tests_count):

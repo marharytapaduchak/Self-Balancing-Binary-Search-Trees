@@ -9,19 +9,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from data_entry import DataEntry
-from abstract_tree import AbstractTree
 from avl_tree import AVLTree
 from splay_tree import SplayTree
-from red_black_tree import RedBlackTree
-# from b_tree import BTree
-# from btree_2_3 import BTree_2_3
+from treap import Treap
+from b_tree import SmallBTree
+from b_tree import MediumBTree
+from b_tree import BigBTree
+from b_tree import TwoThreeTree
 
 class TreeBenchmark:
     """
     Benchmark class to measure and compare performance of different tree implementations.
     """
 
-    def __init__(self, tree_classes: AbstractTree):
+    def __init__(self, tree_classes: dict):
         """
         Initialize benchmark with tree classes to test.
         
@@ -29,27 +30,25 @@ class TreeBenchmark:
             tree_classes: List of tree classes that inherit from AbstractTree
         """
         self.tree_classes = tree_classes
-        self.tree_names = [tree_cls.__name__ for tree_cls in tree_classes]
 
-    def generate_data_entries(self, count: int, cols_count: int) -> DataEntry:
+    def generate_data_entries(self, count: int, cols_count: int, random_factor: int = 50) -> DataEntry:
         """
-        Generate random data entries for testing.
+        Generate sequencial, but partially randomized data entries for testing.
         
         Args:
             count: Number of data entries to generate
             cols_count: Number of columns in each data entry
             
         Returns:
-            List of random DataEntry objects
+            List of sequencial, but partially randomized DataEntry objects
         """
         entries = []
-        for _ in range(count):
-            cols = [random.randint(0, count * 10) for _ in range(cols_count)]
+        for i in range(count):
+            cols = [random.randint(i - random_factor // 2, i + random_factor // 2) for _ in range(cols_count)]
             entries.append(DataEntry(cols))
         return entries
 
-    def measure_insert_performance(self, sizes: int, cols_count: int = 5,
-                                  repeats: int = 3):
+    def measure_insert_performance(self, sizes: list, cols_count: int = 5, repeats: int = 1):
         """
         Measure insert operation performance across different tree sizes.
         
@@ -61,12 +60,12 @@ class TreeBenchmark:
         Returns:
             Dictionary mapping tree names to lists of average execution times
         """
-        results = {name: [] for name in self.tree_names}
+        results = {name: [] for _, name in self.tree_classes}
 
         for size in sizes:
             print(f"Testing insert with size {size}...")
 
-            for tree_idx, tree_class in enumerate(self.tree_classes):
+            for tree_idx, (tree_class, name) in enumerate(self.tree_classes):
                 total_time = 0
 
                 for _ in range(repeats):
@@ -82,12 +81,11 @@ class TreeBenchmark:
                     total_time += (end_time - start_time)
 
                 avg_time = total_time / repeats
-                results[self.tree_names[tree_idx]].append(avg_time)
+                results[self.tree_classes[tree_idx][1]].append(avg_time)
 
         return results
 
-    def measure_find_performance(self, sizes: int, cols_count: int = 5,
-                                search_count: int = 1000, repeats: int = 3):
+    def measure_find_performance(self, sizes: list, cols_count: int = 5, search_ratio: float = 1.0, repeats: int = 1):
         """
         Measure find operation performance across different tree sizes.
         
@@ -100,12 +98,12 @@ class TreeBenchmark:
         Returns:
             Dictionary mapping tree names to lists of average execution times
         """
-        results = {name: [] for name in self.tree_names}
+        results = {name: [] for _, name in self.tree_classes}
 
         for size in sizes:
             print(f"Testing find with size {size}...")
 
-            for tree_idx, tree_class in enumerate(self.tree_classes):
+            for tree_idx, (tree_class, name) in enumerate(self.tree_classes):
                 total_time = 0
 
                 for _ in range(repeats):
@@ -113,23 +111,23 @@ class TreeBenchmark:
                     tree = tree_class(0)
                     for entry in data_entries:
                         tree.insert(entry)
-
-                    search_keys = [random.randint(0, size * 10) for _ in range(search_count)]
+                    search_count = int(size * search_ratio)
+                    keys_to_search = random.sample([entry.columns[0] for entry in data_entries], search_count)
 
                     start_time = time.time()
-                    for key in search_keys:
+                    for key in keys_to_search:
                         tree.find(key)
                     end_time = time.time()
 
                     total_time += (end_time - start_time)
 
-                avg_time = (total_time / repeats) / search_count
-                results[self.tree_names[tree_idx]].append(avg_time)
+                avg_time = total_time / repeats
+                results[self.tree_classes[tree_idx][1]].append(avg_time)
 
         return results
 
     def measure_erase_performance(self, sizes: int, cols_count: int = 5,
-                                erase_ratio: float = 0.5, repeats: int = 3):
+                                erase_ratio: float = 1.0, repeats: int = 1):
         """
         Measure erase operation performance across different tree sizes.
         
@@ -142,12 +140,12 @@ class TreeBenchmark:
         Returns:
             Dictionary mapping tree names to lists of average execution times
         """
-        results = {name: [] for name in self.tree_names}
+        results = {name: [] for _, name in self.tree_classes}
 
         for size in sizes:
             print(f"Testing erase with size {size}...")
 
-            for tree_idx, tree_class in enumerate(self.tree_classes):
+            for tree_idx, (tree_class, name) in enumerate(self.tree_classes):
                 total_time = 0
 
                 for _ in range(repeats):
@@ -164,8 +162,9 @@ class TreeBenchmark:
                     end_time = time.time()
 
                     total_time += (end_time - start_time)
-                avg_time = (total_time / repeats) / erase_count
-                results[self.tree_names[tree_idx]].append(avg_time)
+
+                avg_time = total_time / repeats
+                results[self.tree_classes[tree_idx][1]].append(avg_time)
 
         return results
 
@@ -185,7 +184,7 @@ class TreeBenchmark:
 
         return insert_results, find_results, erase_results
 
-    def plot_results(self, sizes: int, insert_results,
+    def plot_results(self, sizes: dict, insert_results,
                     find_results, erase_results,
                     save_path: str = None) -> None:
         """
@@ -202,7 +201,7 @@ class TreeBenchmark:
 
         styles = ['-o', '--s', '-.^', ':d', '-x', '--+']
 
-        for i, tree_name in enumerate(self.tree_names):
+        for i, (tree_cls, tree_name) in enumerate(self.tree_classes):
             style = styles[i % len(styles)]
             axs[0].plot(sizes, insert_results[tree_name], style, label=tree_name)
         axs[0].set_title('Insert Performance')
@@ -211,21 +210,21 @@ class TreeBenchmark:
         axs[0].legend()
         axs[0].grid(True)
 
-        for i, tree_name in enumerate(self.tree_names):
+        for i, (tree_cls, tree_name) in enumerate(self.tree_classes):
             style = styles[i % len(styles)]
             axs[1].plot(sizes, find_results[tree_name], style, label=tree_name)
         axs[1].set_title('Find Performance')
         axs[1].set_xlabel('Tree Size')
-        axs[1].set_ylabel('Time (seconds per operation)')
+        axs[1].set_ylabel('Time (seconds)')
         axs[1].legend()
         axs[1].grid(True)
 
-        for i, tree_name in enumerate(self.tree_names):
+        for i, (tree_cls, tree_name) in enumerate(self.tree_classes):
             style = styles[i % len(styles)]
             axs[2].plot(sizes, erase_results[tree_name], style, label=tree_name)
         axs[2].set_title('Erase Performance')
         axs[2].set_xlabel('Tree Size')
-        axs[2].set_ylabel('Time (seconds per operation)')
+        axs[2].set_ylabel('Time (seconds)')
         axs[2].legend()
         axs[2].grid(True)
 
@@ -253,30 +252,30 @@ class TreeBenchmark:
 
         styles = ['-o', '--s', '-.^', ':d', '-x', '--+']
 
-        for i, tree_name in enumerate(self.tree_names):
+        for i, (cls, tree_name) in enumerate(self.tree_classes):
             style = styles[i % len(styles)]
             axs[0].loglog(sizes, insert_results[tree_name], style, label=tree_name)
         axs[0].set_title('Insert Performance (Log Scale)')
         axs[0].set_xlabel('Tree Size (log)')
-        axs[0].set_ylabel('Time (seconds) (log)')
+        axs[0].set_ylabel('Time (log)')
         axs[0].legend()
         axs[0].grid(True)
 
-        for i, tree_name in enumerate(self.tree_names):
+        for i, (cls, tree_name) in enumerate(self.tree_classes):
             style = styles[i % len(styles)]
             axs[1].loglog(sizes, find_results[tree_name], style, label=tree_name)
         axs[1].set_title('Find Performance (Log Scale)')
         axs[1].set_xlabel('Tree Size (log)')
-        axs[1].set_ylabel('Time per operation (log)')
+        axs[1].set_ylabel('Time (log)')
         axs[1].legend()
         axs[1].grid(True)
 
-        for i, tree_name in enumerate(self.tree_names):
+        for i, (cls, tree_name) in enumerate(self.tree_classes):
             style = styles[i % len(styles)]
             axs[2].loglog(sizes, erase_results[tree_name], style, label=tree_name)
         axs[2].set_title('Erase Performance (Log Scale)')
         axs[2].set_xlabel('Tree Size (log)')
-        axs[2].set_ylabel('Time per operation (log)')
+        axs[2].set_ylabel('Time (log)')
         axs[2].legend()
         axs[2].grid(True)
 
@@ -303,11 +302,11 @@ class TreeBenchmark:
         """
         selected_size = sizes[size_index]
 
-        insert_times = [insert_results[name][size_index] for name in self.tree_names]
-        find_times = [find_results[name][size_index] for name in self.tree_names]
-        erase_times = [erase_results[name][size_index] for name in self.tree_names]
+        insert_times = [insert_results[name][size_index] for cls, name in self.tree_classes]
+        find_times = [find_results[name][size_index] for cls, name in self.tree_classes]
+        erase_times = [erase_results[name][size_index] for cls, name in self.tree_classes]
 
-        x = np.arange(len(self.tree_names))
+        x = np.arange(len(self.tree_classes))
         width = 0.25
 
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -319,7 +318,7 @@ class TreeBenchmark:
         ax.set_xlabel('Tree Implementation')
         ax.set_ylabel('Time (seconds)')
         ax.set_xticks(x)
-        ax.set_xticklabels(self.tree_names)
+        ax.set_xticklabels([name for cls, name in self.tree_classes])
         ax.legend()
 
         plt.tight_layout()
@@ -335,16 +334,18 @@ def main():
     Main function to run benchmark tests.
     """
     tree_classes = [
-        AVLTree,
-        SplayTree,
-        RedBlackTree,
-        # BTree
-        # BTree_2_3
+        (AVLTree, "AVL tree"),
+        (SplayTree, "Splay tree"),
+        (Treap, "Treap"),
+        (SmallBTree, "B-tree (m = 10)"),
+        (MediumBTree, "B-tree (m = 35)"),
+        (BigBTree, "B-tree (m = 100)"),
+        (TwoThreeTree, "2-3-tree")
     ]
 
     benchmark = TreeBenchmark(tree_classes)
 
-    sizes = [100, 500, 1000, 2000, 5000, 10000]
+    sizes = [10000, 20000, 30000, 40000, 50000]
 
     print("Starting benchmarks...")
     insert_results, find_results, erase_results = benchmark.run_all_benchmarks(sizes)
@@ -358,4 +359,6 @@ def main():
 
 
 if __name__ == "__main__":
+    import sys
+    sys.setrecursionlimit(int(1e9))
     main()
