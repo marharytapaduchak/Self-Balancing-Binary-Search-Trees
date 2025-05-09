@@ -6,7 +6,8 @@ tree-based database implementations. It supports multiple tree data structures
 (AVL, B-Tree, Red-Black, Splay, Treap) and provides a simple SQL-like query interface.
 """
 
-from typing import List, Union, Any, Optional, Tuple
+from typing import Any
+from data_entry import ColumnType
 from database import Database
 from avl_tree import AVLTree
 from b_tree import SmallBTree, MediumBTree, BigBTree, TwoThreeTree
@@ -44,12 +45,12 @@ def validate_table_name(table_name: str) -> str:
     return table_name
 
 
-def validate_column_names(column_names: List[str]) -> List[str]:
+def validate_column_names(column_names: list[str]) -> list[str]:
     """
     Validates a list of column names to ensure they contain only valid characters.
 
     Args:
-        column_names: List of column names to validate
+        column_names: list of column names to validate
 
     Returns:
         The validated list of column names
@@ -75,12 +76,12 @@ def validate_column_names(column_names: List[str]) -> List[str]:
     return validated_columns
 
 
-def validate_values(values: List[Any]) -> List[Any]:
+def validate_values(values: list) -> list:
     """
     Validates a list of values to be inserted into a table.
 
     Args:
-        values: List of values to validate
+        values: list of values to validate
 
     Returns:
         The validated list of values
@@ -95,12 +96,12 @@ def validate_values(values: List[Any]) -> List[Any]:
     return values
 
 
-def parse_query(args: List[str], db: Database) -> Optional[Any]:
+def parse_query(args: list[str], db: Database) -> Any | None:
     """
     Parses and executes a SQL-like query against the database.
 
     Args:
-        args: List of query arguments/tokens
+        args: list of query arguments/tokens
         db: Database instance to execute the query against
 
     Returns:
@@ -173,6 +174,52 @@ def parse_query(args: List[str], db: Database) -> Optional[Any]:
                     return f"Successfully inserted data into {table_name}"
                 except Exception as e:
                     raise QueryError(f"Failed to insert data: {str(e)}")
+            case "create":
+                # Check if the query has enough arguments
+                if len(args) < 4:
+                    raise QueryError("CREATE TABLE query is too short")
+
+                # Validate the CREATE TABLE syntax
+                if args[1] != "table":
+                    raise QueryError("CREATE query must have 'TABLE' keyword")
+
+                # Extract and validate table name
+                table_name = args[2]
+                validated_table_name = validate_table_name(table_name)
+
+                # Extract and validate columns section
+                columns = args[3:]
+                if not columns or len(columns) % 2 != 0:
+                    raise QueryError("CREATE TABLE query must have a valid column definition")
+                column_names, column_types = columns[0::2], columns[1::2]
+
+                # Extract column definitions
+                columns = []
+                for i in range(0, len(column_names)):
+                    col_name = column_names[i]
+                    col_type = column_types[i].upper()
+
+                    # Validate column name and type
+                    validated_col_name = validate_column_names([col_name])[0]
+                    match col_type:
+                        case "INT":
+                            col_type = ColumnType.INT
+                        case "LONG":
+                            col_type = ColumnType.LONG
+                        case "CHAR":
+                            col_type = ColumnType.CHAR
+                        case "SMALL_STRING":
+                            col_type = ColumnType.SMALL_STRING
+                        case "BIG_STRING":
+                            col_type = ColumnType.BIG_STRING
+                        case _:
+                            raise QueryError(f"Unsupported column type: {col_type}")
+
+                    columns.append((validated_col_name, col_type))
+
+                # Create the table in the database
+                db.create_table(validated_table_name, columns, 0)
+                return f"Table {validated_table_name} created successfully"
 
             case _:
                 raise QueryError(f"Unsupported command: {args[0]}")
@@ -251,7 +298,7 @@ def run_interactive_mode(db: Database):
             print(f"Unexpected error: {str(e)}")
 
 
-def main(argv: List[str]):
+def main(argv: list[str]):
     """
     Main entry point for the CRUD application.
 
