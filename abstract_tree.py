@@ -11,8 +11,11 @@ class AbstractTreeNode(ABC):
     Represents tree base node
     """
 
-    def __init__(self, data_entry: DataEntry):
-        self.data = [data_entry]
+    def __init__(self, data_entry: DataEntry | None):
+        if data_entry is None:
+            self.data = []
+        else:
+            self.data = [data_entry]
 
 
 class AbstractTree(ABC):
