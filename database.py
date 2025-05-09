@@ -34,6 +34,9 @@ class Database:
                     DatabaseTable.read_from_file(tree_type, f"{db_folder_path}/{table_name}")
                 )
 
+    def __del__(self):
+        self.save()
+
     def save(self):
         """
         Save database
@@ -127,7 +130,6 @@ class Database:
             raise RuntimeError(f"Table with name \"{table_name}\" does not exist.")
 
         self.get_table(table_name).tree.insert(DataEntry(values))
-        self.save()
 
 if __name__ == "__main__":
     from treap import Treap
