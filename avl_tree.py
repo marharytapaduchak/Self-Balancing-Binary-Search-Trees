@@ -168,20 +168,18 @@ class AVLTree(AbstractTree):
             list[DataEntry]: List of matching entries (empty if not found).
         """
 
-        def __find_recursive(node: AVLTreeNode) -> list[DataEntry]:
-            if node is None:
+        curr_node = self.__root
+
+        while True:
+            if curr_node is None:
                 return []
 
-            node_key = node.data[0].columns[self.key_col]
-
-            if key < node_key:
-                return __find_recursive(node.left)
-            elif key > node_key:
-                return __find_recursive(node.right)
+            if key < curr_node.data[0].columns[self.key_col]:
+                curr_node = curr_node.left
+            elif key > curr_node.data[0].columns[self.key_col]:
+                curr_node = curr_node.right
             else:
-                return node.data
-
-        return __find_recursive(self.__root)
+                return curr_node.data
 
     def inorder(self) -> list[DataEntry]:
         """
